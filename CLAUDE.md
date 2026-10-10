@@ -36,6 +36,7 @@ uv run explorador correr secuencias/fase1/*.yaml --seco   # muestra sin enviar n
 uv run explorador correr secuencias/fase1/*.yaml          # envía y registra
 uv run explorador buscar "DEPOSITO;AC-0001;300000"        # control por fuerza bruta (≤101 req)
 uv run explorador cupo                                    # requests de hoy frente a 8.000
+uv run explorador diferencias 15:30 [--detalle]           # antes vs. después del corte (solo lee el log)
 ```
 
 - Probar primero con `--seco`: lo que se manda de verdad queda para siempre en el log.

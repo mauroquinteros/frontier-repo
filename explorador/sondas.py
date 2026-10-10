@@ -174,12 +174,15 @@ def _transfer(reg: Registrador, seq: str, origen: int, destino: int, monto: int,
     return reg.enviar(seq=seq, hipotesis=hipotesis, cuerpo={"m": f"{m};{calcular(m)}"}, esperado=esperado)
 
 
-def umbral_transferencia(reg: Registrador) -> int | None:
+def umbral_transferencia(reg: Registrador, bajo: int = LIMITE_ACEPTADO, alto: int = LIMITE_RECHAZADO) -> int | None:
     """Busca por bisección el mayor monto que acepta TRANSFER y confirma el borde en otra secuencia.
 
     El límite es por operación (B2-acumulado, log 607–618), así que todas las transferencias
     salen de la misma cuenta, con saldo de sobra. Tras cada E506 se intercala una transferencia
     de 1 para que la cuenta no se bloquee.
+
+    `bajo` y `alto`: montos ya observados como aceptado y rechazado. Los de defecto son de la
+    versión de la mañana; tras el cambio de las 15:30 el límite bajó (log 849, 862).
     """
     seq = reg.reset("B2-limite-biseccion", "ENT-RESET")
     _alta(reg, seq, 1, "COM-TRANSFER-01")
@@ -188,7 +191,6 @@ def umbral_transferencia(reg: Registrador) -> int | None:
               "[COM-TRANSFER-01] Preparación: saldo de sobra en AC-0001. "
               'Espera 200 {"status": "recieved", "operacionId": "OP-0001"}',
               (200, {"status": "recieved", "operacionId": "OP-0001"}))
-    bajo, alto = LIMITE_ACEPTADO, LIMITE_RECHAZADO
     while alto - bajo > 1:
         medio = (bajo + alto) // 2
         r = _transfer(reg, seq, 1, 2, medio,

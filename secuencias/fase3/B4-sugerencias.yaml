@@ -1,0 +1,52 @@
+# Fase 3 · Sugerencias de comandos desconocidos.
+# Evidencia previa: HOLA → E301 con "sugerencia":"HALT" (log 473); SALDOS, FOO, XYZ y RETIRO sin
+# sugerencia (13, 142, 143, 472).
+# Hipótesis base: sugiere el comando conocido más cercano (ALTA, CONSULTA, DEPOSITO, TRANSFER,
+# ANULA, PING, HALT) si la distancia de Levenshtein es ≤ 2; con 3 o más, sin sugerencia.
+# No hace falta estado: E301 se decide antes que la aridad y la cuenta.
+seq: B4-sugerencias
+pasos:
+  - {regla: COM-SUGERENCIA-01, hipotesis: "Repetición de log 473: HOLA (distancia 2 de HALT) sugiere HALT", m: "HOLA;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: HALT}}}
+
+  # ¿Se sugieren también los comandos públicos? Distancia 1.
+  - {regla: COM-SUGERENCIA-02, hipotesis: "DEPOSIT (distancia 1 de DEPOSITO) sugiere DEPOSITO", m: "DEPOSIT;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: DEPOSITO}}}
+  - {regla: COM-SUGERENCIA-02, hipotesis: "CONSULT (distancia 1 de CONSULTA) sugiere CONSULTA", m: "CONSULT;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: CONSULTA}}}
+  - {regla: COM-SUGERENCIA-02, hipotesis: "TRANSFE (distancia 1 de TRANSFER) sugiere TRANSFER", m: "TRANSFE;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: TRANSFER}}}
+  - {regla: COM-SUGERENCIA-02, hipotesis: "PONG (distancia 1 de PING) sugiere PING", m: "PONG;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: PING}}}
+  - {regla: COM-SUGERENCIA-02, hipotesis: "ANULAR (distancia 1 de ANULA) sugiere ANULA", m: "ANULAR;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: ANULA}}}
+
+  # Gana el más cercano: ALTO está a 1 de ALTA y a 2 de HALT.
+  - {regla: COM-SUGERENCIA-03, hipotesis: "ALTO sugiere ALTA (distancia 1) y no HALT (distancia 2)", m: "ALTO;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: ALTA}}}
+
+  # Umbral de distancia, sobre HALT y sobre DEPOSITO.
+  - {regla: COM-SUGERENCIA-04, hipotesis: "HALTX (distancia 1 de HALT) sugiere HALT", m: "HALTX;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: HALT}}}
+  - {regla: COM-SUGERENCIA-04, hipotesis: "HXLXT (distancia 2 de HALT) sugiere HALT", m: "HXLXT;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: HALT}}}
+  - {regla: COM-SUGERENCIA-04, hipotesis: "HXXXT (distancia 3 de HALT) no trae sugerencia", m: "HXXXT;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido "}}}
+  - {regla: COM-SUGERENCIA-04, hipotesis: "DEPOSI (distancia 2 de DEPOSITO) sugiere DEPOSITO", m: "DEPOSI;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: DEPOSITO}}}
+  - {regla: COM-SUGERENCIA-04, hipotesis: "DEPOS (distancia 3 de DEPOSITO) no trae sugerencia", m: "DEPOS;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido "}}}
+
+  # Mayúsculas: se apuesta a que el comando distingue mayúsculas pero la sugerencia compara en mayúsculas.
+  - {regla: COM-SUGERENCIA-05, hipotesis: "alta en minúsculas es desconocido y sugiere ALTA", m: "alta;Ana;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: ALTA}}}
+  - {regla: COM-SUGERENCIA-05, hipotesis: "halt en minúsculas es desconocido y sugiere HALT", m: "halt;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: HALT}}}
+
+  # Los argumentos no influyen.
+  - {regla: COM-SUGERENCIA-06, hipotesis: "DEPOSIT con argumentos sugiere DEPOSITO igual (E301 antes que la aridad)", m: "DEPOSIT;AC-0001;100;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: DEPOSITO}}}
+
+  # Empate: HALTA está a 1 de HALT y a 1 de ALTA. Se apuesta por el orden de registro (ALTA primero).
+  - {regla: COM-SUGERENCIA-07, hipotesis: "HALTA empata entre ALTA y HALT (distancia 1); gana ALTA", m: "HALTA;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: ALTA}}}
