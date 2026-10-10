@@ -1,0 +1,24 @@
+# Fase 2 · Caracteres del español sin evidencia (C8): tildes, ñ y espacios, 3 casos de cada uno.
+# Los controles los busca el buscador antes de la secuencia (estos mensajes no son "seguros" para
+# la fórmula). Prueba primero dos hipótesis: el servicio ignora el carácter, o quita la tilde (á → A).
+# Luego cada ALTA debe crear la cuenta siguiente.
+seq: F2-espanol
+pasos:
+  - {regla: INT-CARACTER-01, hipotesis: "Tilde: ALTA;Lucía se acepta", m: "ALTA;Lucía;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: INT-CARACTER-01, hipotesis: "Tilde: ALTA;José se acepta", m: "ALTA;José;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: INT-CARACTER-01, hipotesis: "Tilde: ALTA;Raúl se acepta", m: "ALTA;Raúl;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0003}}}
+  - {regla: INT-CARACTER-02, hipotesis: "Ñ: ALTA;Muñoz se acepta", m: "ALTA;Muñoz;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0004}}}
+  - {regla: INT-CARACTER-02, hipotesis: "Ñ: ALTA;Peña se acepta", m: "ALTA;Peña;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0005}}}
+  - {regla: INT-CARACTER-02, hipotesis: "Ñ: ALTA;Iñigo se acepta", m: "ALTA;Iñigo;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0006}}}
+  - {regla: INT-CARACTER-03, hipotesis: "Espacio: ALTA;Ana Maria se acepta", m: "ALTA;Ana Maria;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0007}}}
+  - {regla: INT-CARACTER-03, hipotesis: "Espacio: ALTA;Juan Carlos se acepta", m: "ALTA;Juan Carlos;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0008}}}
+  - {regla: INT-CARACTER-03, hipotesis: "Espacio: ALTA;Luis Miguel se acepta", m: "ALTA;Luis Miguel;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0009}}}

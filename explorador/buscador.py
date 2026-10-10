@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 
 from . import config
-from .control import calcular
+from .control import calcular, sin_tildes
 from .registrador import Registrador
 
 ESPERADO_E202 = (400, {"error": "E202", "mensaje": "control inválido"})
@@ -56,9 +56,10 @@ class Buscador:
         return {m: self.cache.get(m) for m in mensajes}
 
     def _buscar(self, seq: str, mensaje: str) -> int | None:
-        # La predicción de la fórmula va primero: si acierta, cuesta 2 requests en vez de ~51.
-        prediccion = calcular(mensaje)
-        for c in [prediccion] + [c for c in range(100) if c != prediccion]:
+        # Las predicciones van primero: si una acierta, cuesta 2–3 requests en vez de ~51.
+        # 1) la fórmula tal cual (descarta tildes, ñ y espacios); 2) la letra sin la tilde (á → A).
+        predicciones = list(dict.fromkeys([calcular(mensaje), calcular(sin_tildes(mensaje))]))
+        for c in predicciones + [c for c in range(100) if c not in predicciones]:
             r = self._probar(seq, mensaje, c)
             if es_e202(r.status, r.response):
                 continue
