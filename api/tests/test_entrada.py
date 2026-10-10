@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from app import control
+from app.services import control
 from conftest import TOKEN
 
 E001 = (401, {"error": "E001", "mensaje": "no autorizado"})

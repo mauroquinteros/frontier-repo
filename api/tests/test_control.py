@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from app import control
+from app.services import control
 
 RAIZ = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RAIZ))

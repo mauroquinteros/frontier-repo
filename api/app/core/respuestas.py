@@ -22,6 +22,14 @@ OK = {"ok": True}
 PONG = {"pong": True}
 
 
+class ErrorServicio(Exception):
+    """Cualquier error del protocolo. El manejador de main.py lo convierte en respuesta."""
+
+    def __init__(self, codigo: str, **extra):
+        self.codigo = codigo
+        self.extra = extra
+
+
 def error(codigo: str, **extra) -> JSONResponse:
     status, mensaje = ERRORES[codigo]
     return JSONResponse({"error": codigo, "mensaje": mensaje, **extra}, status_code=status)

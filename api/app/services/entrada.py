@@ -9,15 +9,10 @@ Evidencia en experimentos.jsonl: 32–44, 65–74, 75–93 (tamaño), 95–111 (
 import json
 import re
 
-from . import control
+from app.core.respuestas import ErrorServicio
+from app.services import control
 
-MAX_BYTES = 8192
 FORMATO_CONTROL = re.compile(r"[0-9]{1,2}")
-
-
-class ErrorEntrada(Exception):
-    def __init__(self, codigo: str):
-        self.codigo = codigo
 
 
 def _sin_constantes(nombre: str):
@@ -25,15 +20,15 @@ def _sin_constantes(nombre: str):
     raise ValueError(nombre)
 
 
-def leer_m(cuerpo: bytes) -> str:
-    if len(cuerpo) > MAX_BYTES:
-        raise ErrorEntrada("E101")
+def leer_m(cuerpo: bytes, max_bytes: int) -> str:
+    if len(cuerpo) > max_bytes:
+        raise ErrorServicio("E101")
     try:
         datos = json.loads(cuerpo, parse_constant=_sin_constantes)
     except ValueError:  # incluye JSONDecodeError y UnicodeDecodeError
-        raise ErrorEntrada("E100")
+        raise ErrorServicio("E100")
     if not isinstance(datos, dict) or not isinstance(datos.get("m"), str):
-        raise ErrorEntrada("E102")
+        raise ErrorServicio("E102")
     return datos["m"]
 
 
@@ -43,16 +38,16 @@ def segmentos(m: str) -> list[str]:
     El primer segmento es el comando, ya en mayúsculas (log 829: `alta` funciona como `ALTA`).
     """
     if ";" not in m:
-        raise ErrorEntrada("E103")
+        raise ErrorServicio("E103")
     partes = m.split(";")
     if any(p == "" for p in partes):
-        raise ErrorEntrada("E104")
+        raise ErrorServicio("E104")
     partes[0] = partes[0].upper()
     if partes[0] == "PING":
         return partes[:-1]
     c = partes[-1]
     if not FORMATO_CONTROL.fullmatch(c):
-        raise ErrorEntrada("E201")
+        raise ErrorServicio("E201")
     if int(c) != control.calcular(m.rpartition(";")[0]):
-        raise ErrorEntrada("E202")
+        raise ErrorServicio("E202")
     return partes[:-1]
