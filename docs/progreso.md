@@ -19,7 +19,7 @@
 | 4. Memoria | Casi hecha (cubierta en la fase 3) | Numeración y bloqueo de cuentas |
 | 5. Vigilancia | Cambio detectado (15:30) | Repetición de todas las fases en curso; comparar con `explorador diferencias 15:30` |
 | Cierre (lote de ~30 secuencias) | Sin hacer | — |
-| Reemplazo | Sin empezar | — |
+| Reemplazo | Comandos implementados (18:50) | `api/`: reproduce todas las secuencias del log posteriores a las 15:30 (`tests/test_log.py`) |
 | Especificación | Sin empezar | — |
 
 ## 2. Lo que sabemos
@@ -97,6 +97,14 @@ TRANSFER: E303 monto → E304 misma cuenta → E401 cuenta → E510 bloqueada �
 
 Evidencia: 95–98, 606, 704–707, 796–803, 812–815.
 
+### Fase 6 (18:55–19:05, log 1305–1409)
+
+- `HALT;<x>` (1 argumento, cualquiera; no valida cuenta) → 409 `{"error":"E520","mensaje":"operación destructiva: detiene el servicio; reenvía con confirmación"}` sin efecto en el estado (1310–1319, 1407). Confirmado. La forma de confirmar no se probó.
+- `intentos` crece sin tope (1328–1333, 1376–1382). `E304` gana sobre `E510` y no lo sube (1330).
+- **Un `DEPOSITO` en la cuenta bloqueada la desbloquea** y reinicia rechazos e intentos (1335–1336, 1355–1357, 1396–1401). Confirmado. Un depósito en otra cuenta, una transferencia entrante o `CONSULTA` no desbloquean.
+- `DEPOSITO`: `E303` antes que `E401` (1344–1345).
+- Empate de sugerencias: gana el orden alfabético (`HANG`, `PILT` → `HALT`; 1346–1347).
+
 ### Cambios durante el día (`CAM`)
 
 Detectado al repetir la línea base a las 18:15. Comparación con `explorador diferencias 15:30`.
@@ -105,10 +113,12 @@ Detectado al repetir la línea base a las 18:15. Comparación con `explorador di
 | --- | --- | --- | --- |
 | Saldo en `CONSULTA` | Número entero: `"saldo":40000` | Texto con 2 decimales, el monto en centavos: `"saldo":"400.00"`, `"0.00"` | 9 → 841, 6 → 838, 523 → 942 |
 | Límite de `TRANSFER` | 100.000 por operación | 50.000 por operación | 11 → 843, 136 → 862, 699 → 924; borde 958/959 |
+| `E510` cuenta bloqueada | 409 `{"error":"E510","mensaje":"cuenta bloqueada"}` | 423 y `"intentos":N`: cuántos `E510` lleva la cuenta, desde 1. `E303` y `E401` no lo suben | 634 → 1075, 811/814/815 → 1199/1202/1203 |
+| Saldo negativo (tras `ANULA`) | `-40000` | `"-400.00"` | 733 → 1121 |
 | Control (ISO 7064 MOD 97-10) | — | Sin cambios | `F2-verificacion-2` 24/24 iguales (882–905) |
 | Validación de montos (`E303`) | — | Sin cambios | `B1-montos` 933–949 |
 
-Pendiente de repetir: entrada (`F1-*`), bloqueo, `ANULA`, orden de errores y sugerencias.
+Sin cambios: entrada (`F1-*`), tamaño máximo (8.192 bytes, 1236–1239), monto máximo (1301–1304), contador de bloqueo, orden de errores y sugerencias (log 960–1304).
 
 ### Riesgos (`RIE`)
 
@@ -123,7 +133,7 @@ Pendiente de repetir: entrada (`F1-*`), bloqueo, `ANULA`, orden de errores y sug
 
 | Tarea | Por qué importa | Costo aprox. |
 | --- | --- | --- |
-| **`HALT`** | Comando oculto. Si el set lo usa y el reemplazo no lo conoce, falla. Puede cambiar el estado (por ejemplo, detener el token) | ~8 requests |
+| `HALT` confirmado | `E520` pide confirmación. Ejecutarlo "detiene el servicio": decisión del usuario | — |
 | **Confirmación (bloque 5)** | Varias reglas se vieron en una sola secuencia y están como _probables_. La especificación pide dos secuencias para _confirmado_ | ~80 requests |
 | **Lote de cierre** | Criterio de cierre: ~30 secuencias nuevas con ≥ 80 % de predicciones acertadas | ~150 requests |
 | **Vigilancia (fase 5)** | Ya hubo un cambio a las 15:30. Repetir la línea base ~19:30 por si hay otro | 21 |

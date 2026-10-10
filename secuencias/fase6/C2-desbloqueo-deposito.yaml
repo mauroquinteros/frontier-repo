@@ -1,0 +1,15 @@
+# Fase 6 · Tras C2-intentos (log 1336): ¿un DEPOSITO desbloquea la cuenta?
+seq: C2-desbloqueo-deposito
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0001", m: "DEPOSITO;AC-0001;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Bloqueo AC-0001: E506 n.º 1", m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Bloqueo AC-0001: E506 n.º 2", m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Bloqueo AC-0001: E506 n.º 3", m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-INTENTOS-01, hipotesis: "Primer E510 de AC-0001 con intentos 1", m: "TRANSFER;AC-0001;AC-0002;100;{c}",
+     espera: {status: 423, response: {error: E510, mensaje: cuenta bloqueada, intentos: 1}}}
+  - {regla: MEM-BLOQUEO-14, hipotesis: "DEPOSITO en la cuenta bloqueada se acepta", m: "DEPOSITO;AC-0001;100;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}
+  - {regla: MEM-BLOQUEO-14, hipotesis: "El DEPOSITO desbloquea: con un solo E510 previo, la siguiente transferencia pasa (explica log 1336)", m: "TRANSFER;AC-0001;AC-0002;100;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0003}}}
+  - {regla: MEM-BLOQUEO-14, hipotesis: "Tras el desbloqueo, saldo 10000-0+100-100 = 10000 centavos", m: "CONSULTA;AC-0001;{c}", espera: {status: 200, response: {cuenta_id: AC-0001, saldo: "100.00"}}}

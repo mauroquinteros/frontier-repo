@@ -1,0 +1,38 @@
+# Fase 6 · Duda 2: cómo cuenta "intentos" en E510 y si es por cuenta.
+seq: C2-intentos
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0003", m: "ALTA;Rosa;{c}", espera: {status: 201, response: {cuentaId: AC-0003}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0001", m: "DEPOSITO;AC-0001;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Bloqueo AC-0001: E506 n.º 1", m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Bloqueo AC-0001: E506 n.º 2", m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Bloqueo AC-0001: E506 n.º 3", m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-INTENTOS-01, hipotesis: "Primer E510 de AC-0001 con intentos 1", m: "TRANSFER;AC-0001;AC-0002;100;{c}",
+     espera: {status: 423, response: {error: E510, mensaje: cuenta bloqueada, intentos: 1}}}
+  - {regla: MEM-INTENTOS-01, hipotesis: "Segundo E510 de AC-0001 con intentos 2", m: "TRANSFER;AC-0001;AC-0002;100;{c}",
+     espera: {status: 423, response: {error: E510, mensaje: cuenta bloqueada, intentos: 2}}}
+  - {regla: ERR-ORDEN-13, hipotesis: "Bloqueada + origen y destino iguales: gana E304 (va antes que E510)", m: "TRANSFER;AC-0001;AC-0001;100;{c}",
+     espera: {status: 400, response: {error: E304, mensaje: origen y destino iguales}}}
+  - {regla: MEM-INTENTOS-02, hipotesis: "El E304 intermedio no sube intentos: el siguiente E510 da intentos 3", m: "TRANSFER;AC-0001;AC-0002;100;{c}",
+     espera: {status: 423, response: {error: E510, mensaje: cuenta bloqueada, intentos: 3}}}
+  - {regla: MEM-INTENTOS-03, hipotesis: "intentos no tiene tope en 3: el siguiente E510 da intentos 4", m: "TRANSFER;AC-0001;AC-0002;100;{c}",
+     espera: {status: 423, response: {error: E510, mensaje: cuenta bloqueada, intentos: 4}}}
+  - {regla: MEM-INTENTOS-03, hipotesis: "Sigue subiendo: E510 con intentos 5", m: "TRANSFER;AC-0001;AC-0002;100;{c}",
+     espera: {status: 423, response: {error: E510, mensaje: cuenta bloqueada, intentos: 5}}}
+  - {regla: MEM-BLOQUEO-02, hipotesis: "CONSULTA de una cuenta bloqueada funciona: 200 saldo 100.00", m: "CONSULTA;AC-0001;{c}",
+     espera: {status: 200, response: {cuenta_id: AC-0001, saldo: "100.00"}}}
+  - {regla: MEM-BLOQUEO-02, hipotesis: "DEPOSITO a una cuenta bloqueada funciona", m: "DEPOSITO;AC-0001;100;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}
+  - {regla: MEM-INTENTOS-02, hipotesis: "CONSULTA y DEPOSITO no suben intentos: E510 con intentos 6", m: "TRANSFER;AC-0001;AC-0002;100;{c}",
+     espera: {status: 423, response: {error: E510, mensaje: cuenta bloqueada, intentos: 6}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0003", m: "DEPOSITO;AC-0003;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0003}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Bloqueo AC-0003: E506 n.º 1", m: "TRANSFER;AC-0003;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Bloqueo AC-0003: E506 n.º 2", m: "TRANSFER;AC-0003;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Bloqueo AC-0003: E506 n.º 3", m: "TRANSFER;AC-0003;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-INTENTOS-04, hipotesis: "intentos es por cuenta: primer E510 de AC-0003 con intentos 1", m: "TRANSFER;AC-0003;AC-0002;100;{c}",
+     espera: {status: 423, response: {error: E510, mensaje: cuenta bloqueada, intentos: 1}}}
+  - {regla: MEM-INTENTOS-04, hipotesis: "AC-0001 conserva su contador: E510 con intentos 7", m: "TRANSFER;AC-0001;AC-0002;100;{c}",
+     espera: {status: 423, response: {error: E510, mensaje: cuenta bloqueada, intentos: 7}}}

@@ -1,0 +1,11 @@
+# Fase 6 · HALT sin confirmación (E520) repetido con otra preparación, y estado normal tras el reset.
+seq: C1-halt-reset
+pasos:
+  - {regla: COM-PING-01, hipotesis: "Tras el reset PING responde normal", m: "PING;{c}", espera: {status: 200, response: {pong: true}}}
+  - {regla: ENT-HEALTH-01, hipotesis: "Tras el reset GET /health responde normal", metodo: GET, ruta: /health, espera: {status: 200, response: {ok: true}}}
+  - {regla: COM-ALTA-01, hipotesis: "Tras el reset la numeración vuelve a AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-CONSULTA-01, hipotesis: "Cuenta nueva con saldo 0.00", m: "CONSULTA;AC-0001;{c}", espera: {status: 200, response: {cuenta_id: AC-0001, saldo: "0.00"}}}
+  - {regla: COM-HALT-02, hipotesis: "HALT con un argumento pide confirmación (log 1311): 409 E520", m: "HALT;AC-0001;{c}",
+     espera: {status: 409, response: {error: E520, mensaje: "operación destructiva: detiene el servicio; reenvía con confirmación"}}}
+  - {regla: COM-HALT-04, hipotesis: "El E520 no cambia el estado: CONSULTA sigue en 0.00", m: "CONSULTA;AC-0001;{c}", espera: {status: 200, response: {cuenta_id: AC-0001, saldo: "0.00"}}}
+  - {regla: COM-HALT-04, hipotesis: "El E520 no cambia el estado: la siguiente ALTA es AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}

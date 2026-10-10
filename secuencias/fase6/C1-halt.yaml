@@ -1,0 +1,19 @@
+# Fase 6 · Duda 1: qué hace HALT (aridad, argumento y efecto sobre el estado).
+seq: C1-halt
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0001", m: "DEPOSITO;AC-0001;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: COM-HALT-01, hipotesis: "HALT con 4 argumentos da E302 (aridad inválida)", m: "HALT;A;B;C;D;{c}",
+     espera: {status: 400, response: {error: E302, mensaje: aridad inválida}}}
+  - {regla: COM-HALT-02, hipotesis: "Exploratoria: HALT con una cuenta inexistente; si da E401, HALT recibe una cuenta", m: "HALT;AC-0099;{c}"}
+  - {regla: COM-HALT-03, hipotesis: "Exploratoria: HALT sobre AC-0001 existente; se observa la respuesta", m: "HALT;AC-0001;{c}"}
+  - {regla: COM-HALT-04, hipotesis: "Exploratoria: efecto de HALT en CONSULTA de AC-0001 (sin HALT: 200 saldo 100.00)", m: "CONSULTA;AC-0001;{c}"}
+  - {regla: COM-HALT-04, hipotesis: "Exploratoria: efecto de HALT en DEPOSITO 100 a AC-0001", m: "DEPOSITO;AC-0001;100;{c}"}
+  - {regla: COM-HALT-04, hipotesis: "Exploratoria: efecto de HALT en TRANSFER 100 de AC-0001 a AC-0002", m: "TRANSFER;AC-0001;AC-0002;100;{c}"}
+  - {regla: COM-HALT-04, hipotesis: "Exploratoria: efecto de HALT en TRANSFER 100 de AC-0002 a AC-0001", m: "TRANSFER;AC-0002;AC-0001;100;{c}"}
+  - {regla: COM-HALT-04, hipotesis: "Exploratoria: efecto de HALT en CONSULTA de AC-0002", m: "CONSULTA;AC-0002;{c}"}
+  - {regla: COM-HALT-04, hipotesis: "Exploratoria: efecto de HALT en ALTA nueva", m: "ALTA;Rosa;{c}"}
+  - {regla: COM-HALT-04, hipotesis: "Exploratoria: efecto de HALT en PING", m: "PING;{c}"}
+  - {regla: COM-HALT-04, hipotesis: "Exploratoria: efecto de HALT en GET /health", metodo: GET, ruta: /health}

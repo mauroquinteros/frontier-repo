@@ -1,0 +1,11 @@
+# Fase 6 · Duda 3: orden E303/E401 en DEPOSITO. Duda 4: desempate de sugerencias PING/HALT.
+seq: C3-orden-deposito
+pasos:
+  - {regla: ERR-ORDEN-20, hipotesis: "DEPOSITO con monto 0 a cuenta inexistente: gana E303 (como en TRANSFER)", m: "DEPOSITO;AC-0099;0;{c}",
+     espera: {status: 400, response: {error: E303, mensaje: monto inválido}}}
+  - {regla: ERR-ORDEN-20, hipotesis: "DEPOSITO con monto no numérico a cuenta inexistente: gana E303", m: "DEPOSITO;AC-0099;abc;{c}",
+     espera: {status: 400, response: {error: E303, mensaje: monto inválido}}}
+  - {regla: COM-SUGERENCIA-08, hipotesis: "HANG empata a distancia 2 entre PING y HALT; con orden de registro gana PING", m: "HANG;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: PING}}}
+  - {regla: COM-SUGERENCIA-08, hipotesis: "PILT empata a distancia 2 entre PING y HALT; con orden de registro gana PING", m: "PILT;{c}",
+     espera: {status: 400, response: {error: E301, mensaje: "comando desconocido ", sugerencia: PING}}}
