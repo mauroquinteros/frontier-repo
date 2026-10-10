@@ -1,0 +1,207 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1720" height="1000" viewBox="0 0 1720 1000" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#777"/></marker>
+    <style>
+      .t{font-size:15px;font-weight:700;fill:#1a1a1a}
+      .s{font-size:12.5px;fill:#444}
+      .m{font-family:Menlo,monospace;font-size:11.5px;fill:#333}
+      .band{font-size:13px;font-weight:800;letter-spacing:1.5px}
+      .lbl{font-size:11.5px;fill:#555;font-style:italic}
+      .box{fill:#fff;stroke-width:1.5}
+      .ln{stroke:#333;stroke-width:1.6;fill:none;marker-end:url(#a)}
+      .dl{stroke:#777;stroke-width:1.6;fill:none;stroke-dasharray:6 4;marker-end:url(#ag)}
+    </style>
+  </defs>
+  <rect width="1720" height="1000" fill="#fff"/>
+
+  <!-- Título y leyenda -->
+  <text x="20" y="44" font-size="24" font-weight="800" fill="#1a1a1a">Reto 2 · La caja negra — Arquitectura</text>
+  <line x1="1270" y1="34" x2="1320" y2="34" class="ln"/><text x="1330" y="38" class="s">llamada HTTP</text>
+  <line x1="1450" y1="34" x2="1500" y2="34" class="dl"/><text x="1510" y="38" class="s">lectura / escritura de datos</text>
+
+  <!-- Bandas -->
+  <rect x="20" y="70" width="350" height="865" rx="12" fill="#f2f2f2"/>
+  <text x="40" y="100" class="band" fill="#555">SERVICIO ANTIGUO</text>
+  <rect x="390" y="70" width="525" height="865" rx="12" fill="#edf3fc"/>
+  <text x="410" y="100" class="band" fill="#2a5db0">1 · EXPLORAR</text>
+  <rect x="925" y="70" width="385" height="865" rx="12" fill="#ecf7ef"/>
+  <text x="945" y="100" class="band" fill="#2b7a3d">2 · CONSTRUIR</text>
+  <rect x="1320" y="70" width="380" height="865" rx="12" fill="#fdf2e6"/>
+  <text x="1340" y="100" class="band" fill="#b0601a">3 · MEDIR</text>
+
+  <!-- Servicio antiguo -->
+  <rect x="50" y="130" width="290" height="110" rx="8" class="box" stroke="#999"/>
+  <text x="65" y="155" class="t">Formato del mensaje</text>
+  <text x="65" y="182" class="m">COMANDO;dato1;…;control</text>
+  <text x="65" y="205" class="s">ej.:</text>
+  <text x="65" y="225" class="m">DEPOSITO;AC-0001;250000;86</text>
+
+  <rect x="50" y="330" width="290" height="210" rx="8" fill="#262626"/>
+  <text x="70" y="362" font-size="17" font-weight="800" fill="#fff">Servicio antiguo</text>
+  <text x="70" y="382" font-size="12.5" fill="#bbb">(caja negra)</text>
+  <text x="70" y="412" font-family="Menlo,monospace" font-size="11.5" fill="#ddd">POST /msg</text>
+  <text x="70" y="430" font-family="Menlo,monospace" font-size="11.5" fill="#ddd">GET  /health</text>
+  <text x="70" y="448" font-family="Menlo,monospace" font-size="11.5" fill="#ddd">POST /__reset</text>
+  <text x="70" y="478" font-size="12.5" fill="#ddd">Estado: cuentas AC-…,</text>
+  <text x="70" y="496" font-size="12.5" fill="#ddd">operaciones OP-…, saldos</text>
+  <text x="70" y="522" font-size="12" fill="#f0b46a">Solo el registrador le habla</text>
+
+  <text x="50" y="590" class="s">• 8.000 mensajes/día por token</text>
+  <text x="50" y="612" class="s">• Estado propio por token</text>
+  <text x="50" y="634" class="s">• Puede cambiar durante el día</text>
+  <text x="50" y="656" class="s">• Cuenta la versión de las 20:00</text>
+
+  <!-- Explorar -->
+  <rect x="420" y="130" width="220" height="120" rx="8" class="box" stroke="#2a5db0"/>
+  <text x="435" y="157" class="t">Ejecutor de secuencias</text>
+  <text x="435" y="183" class="s">reset → preparar → probar</text>
+  <text x="435" y="201" class="s">→ consultar saldo</text>
+  <text x="435" y="229" class="s">Fases 0–5 (incl. vigilancia)</text>
+
+  <rect x="660" y="130" width="220" height="120" rx="8" class="box" stroke="#2a5db0"/>
+  <text x="675" y="157" class="t">Buscador de control</text>
+  <text x="675" y="183" class="s">Prueba controles 0–99</text>
+  <text x="675" y="201" class="s">hasta que el servicio acepte</text>
+  <text x="675" y="229" class="s">Fase 2</text>
+
+  <line x1="530" y1="250" x2="530" y2="328" class="ln"/>
+  <line x1="770" y1="250" x2="770" y2="328" class="ln"/>
+
+  <rect x="420" y="330" width="460" height="140" rx="8" class="box" stroke="#2a5db0" stroke-width="2.5"/>
+  <text x="440" y="360" class="t" font-size="17">Registrador</text>
+  <text x="440" y="388" class="s">• Único componente que habla con el servicio antiguo</text>
+  <text x="440" y="410" class="s">• Escribe la hipótesis (ID de regla + respuesta esperada) antes de enviar</text>
+  <text x="440" y="432" class="s">• Nunca guarda el token · marca los rate-limit de infraestructura</text>
+  <text x="440" y="454" class="s">• Sin pruebas manuales: lo que no se registra no es evidencia</text>
+
+  <line x1="420" y1="390" x2="342" y2="390" class="ln"/>
+  <text x="352" y="382" class="lbl">request</text>
+  <line x1="340" y1="430" x2="418" y2="430" class="ln"/>
+  <text x="346" y="448" class="lbl">respuesta</text>
+
+  <line x1="530" y1="470" x2="530" y2="556" class="dl"/>
+  <text x="540" y="520" class="lbl">1 línea por mensaje</text>
+
+  <!-- Log (cilindro) -->
+  <path d="M420,575 v115 a100,15 0 0 0 200,0 v-115" fill="#fff" stroke="#2a5db0" stroke-width="1.5"/>
+  <ellipse cx="520" cy="575" rx="100" ry="15" fill="#e3ecfa" stroke="#2a5db0" stroke-width="1.5"/>
+  <text x="435" y="615" class="t" font-family="Menlo,monospace" font-size="13.5">experimentos.jsonl</text>
+  <text x="435" y="637" class="s">Solo crece</text>
+  <text x="435" y="657" class="m">id · seq · ts · x_req</text>
+  <text x="435" y="675" class="m">hipotesis · request</text>
+  <text x="435" y="693" class="m">status · response</text>
+
+  <rect x="680" y="575" width="200" height="120" rx="8" class="box" stroke="#2a5db0"/>
+  <text x="695" y="602" class="t">Deductor de fórmula</text>
+  <text x="695" y="628" class="s">Analiza pares</text>
+  <text x="695" y="646" class="s">mensaje → control</text>
+  <text x="695" y="674" class="s">No llama al servicio</text>
+  <line x1="620" y1="635" x2="678" y2="635" class="dl"/>
+
+  <rect x="420" y="760" width="460" height="150" rx="8" class="box" stroke="#2a5db0"/>
+  <text x="440" y="789" class="t">Especificación</text>
+  <g font-family="Menlo,monospace" font-size="11.5" fill="#2a5db0" font-weight="700">
+    <rect x="440" y="802" width="40" height="22" rx="4" fill="#e3ecfa"/><text x="448" y="818">ENT</text>
+    <rect x="486" y="802" width="40" height="22" rx="4" fill="#e3ecfa"/><text x="494" y="818">INT</text>
+    <rect x="532" y="802" width="40" height="22" rx="4" fill="#e3ecfa"/><text x="540" y="818">COM</text>
+    <rect x="578" y="802" width="40" height="22" rx="4" fill="#e3ecfa"/><text x="586" y="818">MEM</text>
+    <rect x="624" y="802" width="40" height="22" rx="4" fill="#e3ecfa"/><text x="632" y="818">ERR</text>
+    <rect x="670" y="802" width="40" height="22" rx="4" fill="#e3ecfa"/><text x="678" y="818">CAM</text>
+    <rect x="716" y="802" width="40" height="22" rx="4" fill="#e3ecfa"/><text x="724" y="818">RIE</text>
+  </g>
+  <text x="440" y="850" class="s">Confianza según secuencias en el log:</text>
+  <text x="440" y="872" class="s">0 = <tspan font-weight="700">supuesto</tspan> · 1 = <tspan font-weight="700">probable</tspan> · ≥ 2 = <tspan font-weight="700">confirmado</tspan></text>
+  <text x="440" y="894" class="s">Exploración cerrada: ≥ 80 % aciertos · fórmula 20/20</text>
+  <line x1="480" y1="705" x2="480" y2="758" class="dl"/>
+  <text x="490" y="740" class="lbl">filtrar por ID de regla</text>
+
+  <!-- Construir -->
+  <rect x="950" y="125" width="340" height="795" rx="10" fill="#fff" stroke="#2b7a3d" stroke-width="2.5"/>
+  <text x="970" y="152" class="t" font-size="17">Reemplazo</text>
+
+  <rect x="970" y="170" width="300" height="55" rx="6" fill="#ecf7ef" stroke="#2b7a3d"/>
+  <text x="985" y="192" class="t" font-size="14">Rutas del contrato</text>
+  <text x="985" y="213" class="m">/health · /__reset · /msg</text>
+  <rect x="970" y="245" width="300" height="45" rx="6" fill="#ecf7ef" stroke="#2b7a3d"/>
+  <text x="985" y="273" class="t" font-size="14">Validación del token del equipo</text>
+  <rect x="970" y="310" width="300" height="70" rx="6" fill="#ecf7ef" stroke="#2b7a3d"/>
+  <text x="985" y="333" class="t" font-size="14">Parser del mensaje</text>
+  <text x="985" y="353" class="m">COMANDO;datos;control</text>
+  <text x="985" y="371" class="s">nº de datos incorrecto → error</text>
+  <rect x="970" y="400" width="300" height="85" rx="6" fill="#ecf7ef" stroke="#2b7a3d"/>
+  <text x="985" y="423" class="t" font-size="14">Verificación del control</text>
+  <text x="985" y="443" class="m">E202 control inválido</text>
+  <text x="985" y="463" class="s">Sin fórmula: acepta cualquier</text>
+  <text x="985" y="479" class="s">control numérico</text>
+  <rect x="970" y="505" width="300" height="100" rx="6" fill="#ecf7ef" stroke="#2b7a3d"/>
+  <text x="985" y="528" class="t" font-size="14">Reglas de negocio</text>
+  <text x="985" y="549" class="m">ALTA · CONSULTA · DEPOSITO</text>
+  <text x="985" y="567" class="m">TRANSFER · ANULA · PING</text>
+  <text x="985" y="590" class="s">Límites, saldos, orden de errores</text>
+  <rect x="970" y="625" width="300" height="65" rx="6" fill="#ecf7ef" stroke="#2b7a3d"/>
+  <text x="985" y="648" class="t" font-size="14">Estado en memoria</text>
+  <text x="985" y="670" class="m">AC-0001… · OP-0001… · saldos</text>
+  <rect x="970" y="710" width="300" height="85" rx="6" fill="#ecf7ef" stroke="#2b7a3d"/>
+  <text x="985" y="733" class="t" font-size="14">Catálogo de mensajes</text>
+  <text x="985" y="753" class="s">Copiados letra por letra, defectos</text>
+  <text x="985" y="771" class="s">incluidos: <tspan class="m">"recieved"</tspan>,</text>
+  <text x="985" y="788" class="m">"comando desconocido "</text>
+
+  <line x1="1120" y1="225" x2="1120" y2="243" class="ln"/>
+  <line x1="1120" y1="290" x2="1120" y2="308" class="ln"/>
+  <line x1="1120" y1="380" x2="1120" y2="398" class="ln"/>
+  <line x1="1120" y1="485" x2="1120" y2="503" class="ln"/>
+  <line x1="1120" y1="605" x2="1120" y2="623" class="ln"/>
+  <line x1="1120" y1="690" x2="1120" y2="708" class="ln"/>
+
+  <text x="970" y="835" class="s" font-weight="700">Reglas fijas en código, sin modelo de IA</text>
+  <text x="970" y="857" class="s">Sin evidencia → comportamiento por</text>
+  <text x="970" y="875" class="s">defecto, declarado como supuesto</text>
+  <text x="970" y="897" class="s">Nunca llama al servicio antiguo</text>
+
+  <!-- Flujos Explorar → Construir -->
+  <path d="M880,635 H910 V442 H948" class="dl"/>
+  <text class="lbl" transform="translate(904,560) rotate(-90)">fórmula</text>
+  <path d="M880,835 H935 V555 H948" class="dl"/>
+  <text x="890" y="827" class="lbl">reglas</text>
+
+  <!-- Medir -->
+  <rect x="1350" y="130" width="300" height="160" rx="8" class="box" stroke="#b0601a"/>
+  <text x="1365" y="157" class="t">Durante la exploración</text>
+  <text x="1365" y="179" class="s" font-style="italic">¿Entendemos el servicio?</text>
+  <text x="1365" y="205" class="s">Predicciones vs. respuestas reales</text>
+  <text x="1365" y="223" class="s">en lotes de ~30 secuencias nuevas</text>
+  <text x="1365" y="251" class="s">Meta: <tspan font-weight="700">≥ 80 %</tspan> · fórmula <tspan font-weight="700">20/20</tspan></text>
+
+  <rect x="1350" y="345" width="300" height="190" rx="8" class="box" stroke="#b0601a" stroke-width="2.5"/>
+  <text x="1365" y="372" class="t">Comparador (al construir)</text>
+  <text x="1365" y="394" class="s" font-style="italic">¿Responde igual que lo registrado?</text>
+  <text x="1365" y="420" class="s">Repite todas las secuencias del log</text>
+  <text x="1365" y="438" class="s">contra el reemplazo y compara con</text>
+  <text x="1365" y="456" class="s">lo que respondió el original</text>
+  <text x="1365" y="484" class="s">Meta: <tspan font-weight="700">100 %</tspan> en la versión vigente</text>
+  <text x="1365" y="514" class="s">Fallo → error del reemplazo o cambio</text>
+  <text x="1365" y="530" class="s">del original (lo decide la vigilancia)</text>
+
+  <rect x="1350" y="590" width="300" height="160" rx="8" class="box" stroke="#b0601a"/>
+  <text x="1365" y="617" class="t">Evaluador oficial (al entregar)</text>
+  <text x="1365" y="641" class="m">/evento → /evento/resultados</text>
+  <text x="1365" y="667" class="s">100 pruebas de 1–12 mensajes,</text>
+  <text x="1365" y="685" class="s">cada una desde estado limpio</text>
+  <text x="1365" y="713" class="s">Meta: que suba en cada versión</text>
+
+  <text x="1350" y="790" class="s" font-weight="700">Reglas de comparación</text>
+  <text x="1350" y="812" class="s">• Mismo código de respuesta</text>
+  <text x="1350" y="832" class="s">• JSON: claves en cualquier orden,</text>
+  <text x="1350" y="850" class="s">  listas en el mismo orden, valores idénticos</text>
+  <text x="1350" y="870" class="s">• No JSON: texto letra por letra</text>
+
+  <line x1="1350" y1="440" x2="1292" y2="440" class="ln"/>
+  <line x1="1350" y1="670" x2="1292" y2="670" class="ln"/>
+
+  <!-- Log → Medir -->
+  <path d="M420,640 H402 V955 H1685 V210 H1652" class="dl"/>
+  <path d="M1685,440 H1652" class="dl"/>
+  <text x="1000" y="975" class="lbl" text-anchor="middle">el log alimenta la medición (sin volver a llamar al original)</text>
+</svg>
