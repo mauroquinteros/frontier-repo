@@ -1,0 +1,20 @@
+# Fase 1 · Autenticación (R5–R8). Solo token ausente e inválido.
+seq: F1-auth
+pasos:
+  - regla: ENT-AUTH-01
+    hipotesis: "R5: sin token, /msg rechaza (status y cuerpo desconocidos, se espera 401)"
+    m: "PING;64"
+    auth: ninguno
+  - regla: ENT-AUTH-02
+    hipotesis: "R6: con token inválido, /msg rechaza (se espera 401)"
+    m: "PING;64"
+    auth: invalido
+  - regla: ENT-AUTH-03
+    hipotesis: "R7: /health es pública y responde 200 sin token"
+    metodo: GET
+    ruta: /health
+    auth: ninguno
+  - regla: ENT-AUTH-04
+    hipotesis: "R8: /__reset exige token (se espera 401)"
+    ruta: /__reset
+    auth: ninguno

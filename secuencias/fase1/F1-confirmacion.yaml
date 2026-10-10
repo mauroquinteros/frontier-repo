@@ -1,0 +1,111 @@
+# Fase 1 · Confirmación. Repite las reglas de entrada en otra secuencia y con otro estado
+# (una cuenta con saldo creada antes), ahora con la predicción exacta. Base: log 22–51.
+seq: F1-confirmacion
+pasos:
+  # Preparación: el estado ya no está vacío.
+  - regla: COM-ALTA-01
+    hipotesis: "Preparación: ALTA crea AC-0001 (ejemplo 3)"
+    m: "ALTA;Lucia;82"
+    espera: {status: 201, response: {cuentaId: AC-0001}}
+  - regla: COM-DEPOSITO-01
+    hipotesis: "Preparación: depósito en AC-0001 (ejemplo 6)"
+    m: "DEPOSITO;AC-0001;250000;86"
+    espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}
+
+  # Autenticación
+  - regla: ENT-AUTH-01
+    hipotesis: "Sin token, /msg da E001 aunque el mensaje sea válido"
+    m: "CONSULTA;AC-0001;14"
+    auth: ninguno
+    espera: {status: 401, response: {error: E001, mensaje: no autorizado}}
+  - regla: ENT-AUTH-02
+    hipotesis: "Con token inválido, /msg da E001"
+    m: "CONSULTA;AC-0001;14"
+    auth: invalido
+    espera: {status: 401, response: {error: E001, mensaje: no autorizado}}
+  - regla: ENT-AUTH-03
+    hipotesis: "/health sin token da E001: no es pública"
+    metodo: GET
+    ruta: /health
+    auth: ninguno
+    espera: {status: 401, response: {error: E001, mensaje: no autorizado}}
+  - regla: ENT-AUTH-05
+    hipotesis: "/health con token inválido da E001"
+    metodo: GET
+    ruta: /health
+    auth: invalido
+    espera: {status: 401, response: {error: E001, mensaje: no autorizado}}
+  - regla: ENT-AUTH-04
+    hipotesis: "/__reset sin token da E001 y no borra el estado"
+    ruta: /__reset
+    auth: ninguno
+    espera: {status: 401, response: {error: E001, mensaje: no autorizado}}
+  - regla: ENT-AUTH-04
+    hipotesis: "Tras el reset rechazado, AC-0001 sigue con su saldo"
+    m: "CONSULTA;AC-0001;14"
+    espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 250000}}
+  - regla: ENT-HEALTH-01
+    hipotesis: "/health con token responde ok"
+    metodo: GET
+    ruta: /health
+    espera: {status: 200, response: {ok: true}}
+
+  # Rutas y métodos
+  - regla: ENT-RUTA-01
+    hipotesis: "Otra ruta desconocida con GET da E404"
+    metodo: GET
+    ruta: /cuentas
+    espera: {status: 404, response: {error: E404, mensaje: ruta desconocida}}
+  - regla: ENT-RUTA-03
+    hipotesis: "Método no soportado en una ruta que existe (DELETE /health) da E404, no 405"
+    metodo: DELETE
+    ruta: /health
+    espera: {status: 404, response: {error: E404, mensaje: ruta desconocida}}
+  - regla: ENT-RUTA-04
+    hipotesis: "Ruta desconocida con token inválido da E404: la ruta se evalúa antes que el token"
+    metodo: POST
+    ruta: /cuentas
+    auth: invalido
+    espera: {status: 404, response: {error: E404, mensaje: ruta desconocida}}
+
+  # Forma del cuerpo
+  - regla: ENT-CUERPO-01
+    hipotesis: "JSON mal escrito (coma sobrante) da E100"
+    crudo: '{"m": "PING;64",}'
+    espera: {status: 400, response: {error: E100, mensaje: json inválido}}
+  - regla: ENT-CUERPO-02
+    hipotesis: "Cuerpo con otro campo pero sin m da E102"
+    cuerpo: {mensaje: "PING;64"}
+    espera: {status: 400, response: {error: E102, mensaje: falta m}}
+  - regla: ENT-CUERPO-03
+    hipotesis: "m vacío da E103, no E102"
+    cuerpo: {m: ""}
+    espera: {status: 400, response: {error: E103, mensaje: falta control}}
+  - regla: ENT-CUERPO-04
+    hipotesis: "m que es un objeto da E102"
+    cuerpo: {m: {a: 1}}
+    espera: {status: 400, response: {error: E102, mensaje: falta m}}
+  - regla: ENT-CUERPO-05
+    hipotesis: "Campos extra se ignoran también en un comando con estado"
+    cuerpo: {m: "CONSULTA;AC-0001;14", extra: true}
+    espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 250000}}
+  - regla: ENT-CUERPO-06
+    hipotesis: "Un número como cuerpo da E102"
+    cuerpo: 42
+    espera: {status: 400, response: {error: E102, mensaje: falta m}}
+  - regla: ENT-CUERPO-07
+    hipotesis: "Sin cuerpo da E100"
+    espera: {status: 400, response: {error: E100, mensaje: json inválido}}
+  - regla: ENT-CUERPO-07
+    hipotesis: "JSON válido con Content-Type text/plain se procesa igual"
+    crudo: '{"m": "CONSULTA;AC-0001;14"}'
+    content_type: text/plain
+    espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 250000}}
+  - regla: ENT-CUERPO-09
+    hipotesis: "Un comando con argumentos pero sin ningún ; da E103"
+    cuerpo: {m: "CONSULTA"}
+    espera: {status: 400, response: {error: E103, mensaje: falta control}}
+  - regla: ENT-CUERPO-10
+    hipotesis: "Un segmento vacío en medio da E104"
+    cuerpo: {m: "CONSULTA;;14"}
+    espera: {status: 400, response: {error: E104, mensaje: segmento vacío}}

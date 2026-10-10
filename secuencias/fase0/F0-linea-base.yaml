@@ -1,0 +1,161 @@
+# Fase 0 · Línea base: los 20 ejemplos de pruebas/ejemplos.jsonl, en orden, tras un reset.
+# Generado desde ese archivo. Si algo falla, el servicio cambió desde la mañana (sección CAM).
+seq: F0-linea-base
+pasos:
+- regla: CAM-BASE-01
+  hipotesis: 'Ejemplo 1: responde igual que en la versión de la mañana'
+  m: PING;64
+  espera:
+    status: 200
+    response:
+      pong: true
+- regla: CAM-BASE-02
+  hipotesis: 'Ejemplo 2: responde igual que en la versión de la mañana'
+  m: ALTA;Lucia;83
+  espera:
+    status: 400
+    response:
+      error: E202
+      mensaje: control inválido
+- regla: CAM-BASE-03
+  hipotesis: 'Ejemplo 3: responde igual que en la versión de la mañana'
+  m: ALTA;Lucia;82
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0001
+- regla: CAM-BASE-04
+  hipotesis: 'Ejemplo 4: responde igual que en la versión de la mañana'
+  m: ALTA;Mateo;3
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0002
+- regla: CAM-BASE-05
+  hipotesis: 'Ejemplo 5: responde igual que en la versión de la mañana'
+  m: CONSULTA;AC-0001;14
+  espera:
+    status: 200
+    response:
+      cuenta_id: AC-0001
+      saldo: 0
+- regla: CAM-BASE-06
+  hipotesis: 'Ejemplo 6: responde igual que en la versión de la mañana'
+  m: DEPOSITO;AC-0001;250000;86
+  espera:
+    status: 200
+    response:
+      status: recieved
+      operacionId: OP-0001
+- regla: CAM-BASE-07
+  hipotesis: 'Ejemplo 7: responde igual que en la versión de la mañana'
+  m: TRANSFER;AC-0001;AC-0002;40000;86
+  espera:
+    status: 200
+    response:
+      status: recieved
+      operacionId: OP-0002
+- regla: CAM-BASE-08
+  hipotesis: 'Ejemplo 8: responde igual que en la versión de la mañana'
+  m: CONSULTA;AC-0002;11
+  espera:
+    status: 200
+    response:
+      cuenta_id: AC-0002
+      saldo: 40000
+- regla: CAM-BASE-09
+  hipotesis: 'Ejemplo 9: responde igual que en la versión de la mañana'
+  m: TRANSFER;AC-0001;AC-0002;120000;55
+  espera:
+    status: 422
+    response:
+      error: E506
+      mensaje: límite excedido
+- regla: CAM-BASE-10
+  hipotesis: 'Ejemplo 10: responde igual que en la versión de la mañana'
+  m: TRANSFER;AC-0001;AC-0002;100000;12
+  espera:
+    status: 200
+    response:
+      status: recieved
+      operacionId: OP-0003
+- regla: CAM-BASE-11
+  hipotesis: 'Ejemplo 11: responde igual que en la versión de la mañana'
+  m: CONSULTa;AC-0001;14
+  espera:
+    status: 200
+    response:
+      cuenta_id: AC-0001
+      saldo: 110000
+- regla: CAM-BASE-12
+  hipotesis: 'Ejemplo 12: responde igual que en la versión de la mañana'
+  m: SALDOS;AC-0001;38
+  espera:
+    status: 400
+    response:
+      error: E301
+      mensaje: 'comando desconocido '
+- regla: CAM-BASE-13
+  hipotesis: 'Ejemplo 13: responde igual que en la versión de la mañana'
+  m: ANULA;OP-0003;66
+  espera:
+    status: 200
+    response:
+      ok: true
+      anulada: OP-0003
+- regla: CAM-BASE-14
+  hipotesis: 'Ejemplo 14: responde igual que en la versión de la mañana'
+  m: ANULA;OP-0003;66
+  espera:
+    status: 200
+    response:
+      ok: false
+      motivo: ya anulada
+- regla: CAM-BASE-15
+  hipotesis: 'Ejemplo 15: responde igual que en la versión de la mañana'
+  m: CONSULTA;AC-0009;87
+  espera:
+    status: 404
+    response:
+      error: E401
+      mensaje: cuenta inexistente
+- regla: CAM-BASE-16
+  hipotesis: 'Ejemplo 16: responde igual que en la versión de la mañana'
+  m: TRANSFER;AC-0002;AC-0001;50000;23
+  espera:
+    status: 422
+    response:
+      error: E507
+      mensaje: saldo insuficiente
+- regla: CAM-BASE-17
+  hipotesis: 'Ejemplo 17: responde igual que en la versión de la mañana'
+  m: DEPOSITO;AC-0002;700;5X
+  espera:
+    status: 400
+    response:
+      error: E201
+      mensaje: control mal formado
+- regla: CAM-BASE-18
+  hipotesis: 'Ejemplo 18: responde igual que en la versión de la mañana'
+  m: DEPOSITO;AC-0002;700;35
+  espera:
+    status: 200
+    response:
+      status: recieved
+      operacionId: OP-0004
+- regla: CAM-BASE-19
+  hipotesis: 'Ejemplo 19: responde igual que en la versión de la mañana'
+  m: CONSULTA;AC-0002;11
+  espera:
+    status: 200
+    response:
+      cuenta_id: AC-0002
+      saldo: 40700
+- regla: CAM-BASE-20
+  hipotesis: 'Ejemplo 20: responde igual que en la versión de la mañana'
+  m: ALTA;Lucia;Gomez;11
+  espera:
+    status: 400
+    response:
+      error: E302
+      mensaje: aridad inválida

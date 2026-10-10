@@ -1,0 +1,82 @@
+# Fase 2 · Estructura del control (C1–C5). Qué se evalúa antes del control y qué formatos acepta.
+# Estado vacío: CONSULTA de una cuenta inexistente da E401 si el control es válido y E202 si no
+# (siempre que C1 confirme que el control se valida antes que la cuenta).
+seq: F2-estructura
+pasos:
+  # C1: ¿control antes que cuenta? CONSULTA;AC-0009 tiene control 87 (ejemplo 15).
+  - regla: ERR-ORDEN-01
+    hipotesis: "C1: con control erróneo y cuenta inexistente gana el control"
+    m: "CONSULTA;AC-0009;88"
+    espera: {status: 400, response: {error: E202, mensaje: control inválido}}
+
+  # C2: ¿comando desconocido antes que control? 38 era el control del ejemplo 12.
+  - regla: ERR-ORDEN-02
+    hipotesis: "C2: comando desconocido con otro control sigue dando E301: el comando va antes que el control"
+    m: "SALDOS;AC-0001;39"
+    espera: {status: 400, response: {error: E301, mensaje: "comando desconocido "}}
+  - regla: ERR-ORDEN-02
+    hipotesis: "C2: comando desconocido con control mal formado da E301: el comando va antes que el formato del control"
+    m: "SALDOS;AC-0001;5X"
+    espera: {status: 400, response: {error: E301, mensaje: "comando desconocido "}}
+
+  # C3: ¿aridad antes que control? 11 era el control del ejemplo 20.
+  - regla: ERR-ORDEN-03
+    hipotesis: "C3: aridad incorrecta con otro control sigue dando E302: la aridad va antes que el control"
+    m: "ALTA;Lucia;Gomez;12"
+    espera: {status: 400, response: {error: E302, mensaje: aridad inválida}}
+
+  # C4: formatos del control sobre CONSULTA;AC-0001 (control 14).
+  - regla: INT-FORMATO-01
+    hipotesis: "C4: el control correcto 14 pasa el control (cuenta inexistente)"
+    m: "CONSULTA;AC-0001;14"
+    espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}
+  - regla: INT-FORMATO-02
+    hipotesis: "C4: con un cero a la izquierda (014) se lee como 14"
+    m: "CONSULTA;AC-0001;014"
+    espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}
+  - regla: INT-FORMATO-03
+    hipotesis: "C4: 111 (14 + 97) no se reduce módulo 97: da E202"
+    m: "CONSULTA;AC-0001;111"
+    espera: {status: 400, response: {error: E202, mensaje: control inválido}}
+  - regla: INT-FORMATO-03
+    hipotesis: "C4: un control numérico de 3 cifras (100) da E202, no E201"
+    m: "CONSULTA;AC-0001;100"
+    espera: {status: 400, response: {error: E202, mensaje: control inválido}}
+  - regla: INT-FORMATO-03
+    hipotesis: "C4: 999 da E202"
+    m: "CONSULTA;AC-0001;999"
+    espera: {status: 400, response: {error: E202, mensaje: control inválido}}
+  - regla: INT-FORMATO-04
+    hipotesis: "C4: un control negativo (-1) da E201"
+    m: "CONSULTA;AC-0001;-1"
+    espera: {status: 400, response: {error: E201, mensaje: control mal formado}}
+  - regla: INT-FORMATO-04
+    hipotesis: "C4: con signo + (+14) da E201"
+    m: "CONSULTA;AC-0001;+14"
+    espera: {status: 400, response: {error: E201, mensaje: control mal formado}}
+  - regla: INT-FORMATO-04
+    hipotesis: "C4: con un espacio delante (' 14') da E201"
+    m: "CONSULTA;AC-0001; 14"
+    espera: {status: 400, response: {error: E201, mensaje: control mal formado}}
+  - regla: INT-FORMATO-04
+    hipotesis: "C4: con un espacio detrás ('14 ') da E201"
+    m: "CONSULTA;AC-0001;14 "
+    espera: {status: 400, response: {error: E201, mensaje: control mal formado}}
+  - regla: INT-FORMATO-05
+    hipotesis: "C4: control vacío da E104 segmento vacío"
+    m: "CONSULTA;AC-0001;"
+    espera: {status: 400, response: {error: E104, mensaje: segmento vacío}}
+
+  # C5: ¿PING valida el control? 64 es el del ejemplo 1.
+  - regla: INT-PING-01
+    hipotesis: "C5: PING con otro control da E202: PING también valida"
+    m: "PING;65"
+    espera: {status: 400, response: {error: E202, mensaje: control inválido}}
+  - regla: INT-PING-01
+    hipotesis: "C5: PING con control 0 da E202"
+    m: "PING;0"
+    espera: {status: 400, response: {error: E202, mensaje: control inválido}}
+  - regla: INT-PING-02
+    hipotesis: "C5: PING con control no numérico (XX) da E201"
+    m: "PING;XX"
+    espera: {status: 400, response: {error: E201, mensaje: control mal formado}}

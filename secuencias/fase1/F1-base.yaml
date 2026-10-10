@@ -1,0 +1,15 @@
+# Fase 1 · Caso principal (R1–R4). El reset automático del inicio cubre R3.
+seq: F1-base
+pasos:
+  - regla: ENT-RESET-01
+    hipotesis: "R4: tras el reset no existe ninguna cuenta"
+    m: "CONSULTA;AC-0001;14"
+    espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}
+  - regla: ENT-MSG-01
+    hipotesis: "R1: un mensaje bien formado responde como en el ejemplo 1"
+    m: "PING;64"
+    espera: {status: 200, response: {pong: true}}
+  - regla: ENT-HEALTH-01
+    hipotesis: "R2: /health responde 200 (cuerpo desconocido)"
+    metodo: GET
+    ruta: /health

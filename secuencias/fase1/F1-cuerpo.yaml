@@ -1,0 +1,43 @@
+# Fase 1 · Forma del cuerpo (R13–R22), todos a POST /msg con token válido.
+seq: F1-cuerpo
+pasos:
+  - regla: ENT-CUERPO-01
+    hipotesis: "R13: JSON mal escrito da un error de entrada"
+    crudo: '{"m": "PING;64"'
+  - regla: ENT-CUERPO-02
+    hipotesis: "R14: cuerpo sin m da un error de entrada"
+    cuerpo: {}
+  - regla: ENT-CUERPO-03
+    hipotesis: "R15: m vacío da un error de entrada"
+    cuerpo: {m: ""}
+  - regla: ENT-CUERPO-04
+    hipotesis: "R16: m numérico da un error de entrada"
+    cuerpo: {m: 123}
+  - regla: ENT-CUERPO-04
+    hipotesis: "R16: m null da el mismo error que m numérico"
+    cuerpo: {m: null}
+  - regla: ENT-CUERPO-05
+    hipotesis: "R17: ignora campos extra y responde pong"
+    cuerpo: {m: "PING;64", x: 1}
+    espera: {status: 200, response: {pong: true}}
+  - regla: ENT-CUERPO-06
+    hipotesis: "R18: un array como cuerpo da un error de entrada"
+    cuerpo: ["PING;64"]
+  - regla: ENT-CUERPO-06
+    hipotesis: "R18: un string JSON como cuerpo da el mismo error que un array"
+    cuerpo: "PING;64"
+  - regla: ENT-CUERPO-07
+    hipotesis: "R19: sin cuerpo da un error de entrada"
+  - regla: ENT-CUERPO-07
+    hipotesis: "R19: JSON válido con Content-Type text/plain: ¿exige el header JSON?"
+    crudo: '{"m": "PING;64"}'
+    content_type: text/plain
+  - regla: ENT-CUERPO-09
+    hipotesis: "R21: mensaje sin control da E201 u otro error de formato"
+    cuerpo: {m: PING}
+  - regla: ENT-CUERPO-10
+    hipotesis: "R22: solo separadores da un error de formato"
+    cuerpo: {m: ";;;"}
+  - regla: ENT-CUERPO-10
+    hipotesis: "R22: un ; al final cambia la cantidad de campos"
+    cuerpo: {m: "PING;64;"}

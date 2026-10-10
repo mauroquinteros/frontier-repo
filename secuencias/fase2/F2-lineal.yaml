@@ -1,0 +1,46 @@
+# Fase 2 · Hipótesis lineal módulo 97 (C6 y más). Cada predicción cuesta 1 request en vez de ~51.
+#
+# Pista: CONSULTA;AC-0001 → 14, AC-0002 → 11, AC-0009 → 87 = 14 − 3·8 (mod 97).
+# Hipótesis H1: subir 1 el último dígito resta 3 al control (mod 97).
+# Hipótesis H2: el dígito anterior pesa 10 veces más (−30), como en IBAN (ISO 7064 MOD 97-10).
+#
+# Estado vacío: si el control es correcto la cuenta no existe (E401); si no, E202.
+# Solo es concluyente si C1 (F2-estructura) mostró que el control va antes que la cuenta.
+# Los pasos "negativos" (control + 1) comprueban justamente eso.
+seq: F2-lineal
+pasos:
+  # H1: último dígito, k de 0 a 8 (1, 2 y 9 ya se conocen).
+  - {regla: INT-LINEAL-01, hipotesis: "H1: CONSULTA;AC-0000 tiene control 17 (14 + 3)", m: "CONSULTA;AC-0000;17",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-01, hipotesis: "H1: CONSULTA;AC-0003 tiene control 8", m: "CONSULTA;AC-0003;8",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-01, hipotesis: "H1: CONSULTA;AC-0004 tiene control 5", m: "CONSULTA;AC-0004;5",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-01, hipotesis: "H1: CONSULTA;AC-0005 tiene control 2", m: "CONSULTA;AC-0005;2",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-01, hipotesis: "H1 negativo: CONSULTA;AC-0005 con 3 da E202", m: "CONSULTA;AC-0005;3",
+     espera: {status: 400, response: {error: E202, mensaje: control inválido}}}
+  - {regla: INT-LINEAL-01, hipotesis: "H1: CONSULTA;AC-0006 tiene control 96 (−1 mod 97): el rango llega a 96",
+     m: "CONSULTA;AC-0006;96", espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-01, hipotesis: "H1: CONSULTA;AC-0007 tiene control 93", m: "CONSULTA;AC-0007;93",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-01, hipotesis: "H1: CONSULTA;AC-0008 tiene control 90", m: "CONSULTA;AC-0008;90",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+
+  # H2: posiciones decimales anteriores (peso ×10 por posición, mod 97).
+  - {regla: INT-LINEAL-02, hipotesis: "H2: CONSULTA;AC-0010 tiene control 84 (17 − 30 + 97)", m: "CONSULTA;AC-0010;84",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-02, hipotesis: "H2 negativo: CONSULTA;AC-0010 con 85 da E202", m: "CONSULTA;AC-0010;85",
+     espera: {status: 400, response: {error: E202, mensaje: control inválido}}}
+  - {regla: INT-LINEAL-02, hipotesis: "H2: CONSULTA;AC-0011 tiene control 81", m: "CONSULTA;AC-0011;81",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-02, hipotesis: "H2: CONSULTA;AC-0100 tiene control 8 (17 − 300 mod 97)", m: "CONSULTA;AC-0100;8",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-02, hipotesis: "H2: CONSULTA;AC-1000 tiene control 24 (17 − 3000 mod 97)", m: "CONSULTA;AC-1000;24",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+
+  # H1 y H2 en otro comando y otro campo: el monto de DEPOSITO;AC-0001;250000 (control 86).
+  - {regla: INT-LINEAL-03, hipotesis: "H1 en el monto: DEPOSITO;AC-0001;250001 tiene control 83", m: "DEPOSITO;AC-0001;250001;83",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: INT-LINEAL-03, hipotesis: "H2 en el monto: DEPOSITO;AC-0001;250010 tiene control 56", m: "DEPOSITO;AC-0001;250010;56",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}

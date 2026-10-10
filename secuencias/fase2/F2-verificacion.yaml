@@ -1,0 +1,161 @@
+# Fase 2 · Verificación de la fórmula (explorador/control.py): 20 mensajes nunca enviados,
+# los bordes 0 y 1 (donde difiere de IBAN) y 3 negativos. Criterio de cierre: 20/20.
+# Generado con la fórmula; los controles van escritos para que el log los muestre.
+seq: F2-verificacion
+pasos:
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 1/20: la fórmula da 3 para ''ALTA;Zoe'''
+  m: ALTA;Zoe;3
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 2/20: la fórmula da 86 para ''ALTA;Xiomara'''
+  m: ALTA;Xiomara;86
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0002
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 3/20: la fórmula da 38 para ''ALTA;quentin'''
+  m: ALTA;quentin;38
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0003
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 4/20: la fórmula da 14 para ''ALTA;WWW'''
+  m: ALTA;WWW;14
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0004
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 5/20: la fórmula da 5 para ''Consulta;AC-0004'''
+  m: Consulta;AC-0004;5
+  espera:
+    status: 200
+    response:
+      cuenta_id: AC-0004
+      saldo: 0
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 6/20: la fórmula da 1 para ''DEPOSITO;AC-0002;987654'''
+  m: DEPOSITO;AC-0002;987654;1
+  espera:
+    status: 200
+    response:
+      status: recieved
+      operacionId: OP-0001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 7/20: la fórmula da 41 para ''DEPOSITO;AC-0004;13'''
+  m: DEPOSITO;AC-0004;13;41
+  espera:
+    status: 200
+    response:
+      status: recieved
+      operacionId: OP-0002
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 8/20: la fórmula da 66 para ''TRANSFER;AC-0002;AC-0001;87654'''
+  m: TRANSFER;AC-0002;AC-0001;87654;66
+  espera:
+    status: 200
+    response:
+      status: recieved
+      operacionId: OP-0003
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 9/20: la fórmula da 78 para ''CONSULTA;AC-0012'''
+  m: CONSULTA;AC-0012;78
+  espera: &id001
+    status: 404
+    response:
+      error: E401
+      mensaje: cuenta inexistente
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 10/20: la fórmula da 14 para ''CONSULTA;AC-0777'''
+  m: CONSULTA;AC-0777;14
+  espera: *id001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 11/20: la fórmula da 49 para ''DEPOSITO;AC-0999;5'''
+  m: DEPOSITO;AC-0999;5;49
+  espera: *id001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 12/20: la fórmula da 89 para ''TRANSFER;AC-0002;AC-0042;10'''
+  m: TRANSFER;AC-0002;AC-0042;10;89
+  espera: *id001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 13/20: la fórmula da 69 para ''ANULA;OP-0002'''
+  m: ANULA;OP-0002;69
+  espera:
+    status: 200
+    response:
+      ok: true
+      anulada: OP-0002
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 14/20: la fórmula da 75 para ''FOO;BAR'''
+  m: FOO;BAR;75
+  espera: &id002
+    status: 400
+    response:
+      error: E301
+      mensaje: 'comando desconocido '
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 15/20: la fórmula da 36 para ''XYZ;AC-0001;1'''
+  m: XYZ;AC-0001;1;36
+  espera: *id002
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 16/20: la fórmula da 44 para ''ALTA;Ana;Maria'''
+  m: ALTA;Ana;Maria;44
+  espera: &id003
+    status: 400
+    response:
+      error: E302
+      mensaje: aridad inválida
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 17/20: la fórmula da 11 para ''CONSULTA'''
+  m: CONSULTA;11
+  espera: *id003
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 18/20: la fórmula da 4 para ''DEPOSITO;AC-0001'''
+  m: DEPOSITO;AC-0001;4
+  espera: *id003
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 19/20: la fórmula da 15 para ''TRANSFER;AC-0001;AC-0002'''
+  m: TRANSFER;AC-0001;AC-0002;15
+  espera: *id003
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 20/20: la fórmula da 25 para ''ANULA;OP-0001;OP-0002'''
+  m: ANULA;OP-0001;OP-0002;25
+  espera: *id003
+- regla: INT-FORMULA-02
+  hipotesis: 'Borde: la fórmula da 0 para ''CONSULTA;AC-0038'' (IBAN daría 98)'
+  m: CONSULTA;AC-0038;0
+  espera: *id001
+- regla: INT-FORMULA-02
+  hipotesis: 'Borde: 98 (variante IBAN) para ''CONSULTA;AC-0038'' da E202'
+  m: CONSULTA;AC-0038;98
+  espera: &id004
+    status: 400
+    response:
+      error: E202
+      mensaje: control inválido
+- regla: INT-FORMULA-02
+  hipotesis: 'Borde: la fórmula da 1 para ''CONSULTA;AC-0070'' (IBAN daría 97)'
+  m: CONSULTA;AC-0070;1
+  espera: *id001
+- regla: INT-FORMULA-02
+  hipotesis: 'Borde: 97 (variante IBAN) para ''CONSULTA;AC-0070'' da E202'
+  m: CONSULTA;AC-0070;97
+  espera: *id004
+- regla: INT-FORMULA-03
+  hipotesis: 'Negativo: 15 no es el control de ''CONSULTA;AC-0777'''
+  m: CONSULTA;AC-0777;15
+  espera: *id004
+- regla: INT-FORMULA-03
+  hipotesis: 'Negativo: 76 no es el control de ''FOO;BAR'''
+  m: FOO;BAR;76
+  espera: *id004
+- regla: INT-FORMULA-03
+  hipotesis: 'Negativo: 45 no es el control de ''ALTA;Ana;Maria'''
+  m: ALTA;Ana;Maria;45
+  espera: *id004

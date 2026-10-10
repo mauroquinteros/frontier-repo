@@ -1,0 +1,136 @@
+# Fase 2 · Verificación 2 de la fórmula (ISO 7064 MOD 97-10, explorador/control.py).
+# 20 mensajes nunca enviados, con los bordes 97, 98 y 2, más 3 negativos. Criterio: 20/20.
+seq: F2-verificacion-2
+pasos:
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 1/20: ISO 7064 MOD 97-10 da 97 para ''CONSULTA;AC-0135'''
+  m: CONSULTA;AC-0135;97
+  espera: &id001
+    status: 404
+    response:
+      error: E401
+      mensaje: cuenta inexistente
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 2/20: ISO 7064 MOD 97-10 da 97 para ''DEPOSITO;AC-0500;26'''
+  m: DEPOSITO;AC-0500;26;97
+  espera: *id001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 3/20: ISO 7064 MOD 97-10 da 98 para ''CONSULTA;AC-0167'''
+  m: CONSULTA;AC-0167;98
+  espera: *id001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 4/20: ISO 7064 MOD 97-10 da 98 para ''DEPOSITO;AC-0500;58'''
+  m: DEPOSITO;AC-0500;58;98
+  espera: *id001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 5/20: ISO 7064 MOD 97-10 da 2 para ''CONSULTA;AC-0102'''
+  m: CONSULTA;AC-0102;2
+  espera: *id001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 6/20: ISO 7064 MOD 97-10 da 2 para ''DEPOSITO;AC-0500;90'''
+  m: DEPOSITO;AC-0500;90;2
+  espera: *id001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 7/20: ISO 7064 MOD 97-10 da 44 para ''ALTA;Beatriz'''
+  m: ALTA;Beatriz;44
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 8/20: ISO 7064 MOD 97-10 da 31 para ''ALTA;Camilo'''
+  m: ALTA;Camilo;31
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0002
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 9/20: ISO 7064 MOD 97-10 da 97 para ''ALTA;Diego'''
+  m: ALTA;Diego;97
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0003
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 10/20: ISO 7064 MOD 97-10 da 30 para ''ALTA;Elena'''
+  m: ALTA;Elena;30
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0004
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 11/20: ISO 7064 MOD 97-10 da 67 para ''ALTA;Fabiola'''
+  m: ALTA;Fabiola;67
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0005
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 12/20: ISO 7064 MOD 97-10 da 31 para ''ALTA;Gonzalo'''
+  m: ALTA;Gonzalo;31
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0006
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 13/20: ISO 7064 MOD 97-10 da 23 para ''ALTA;Hilda'''
+  m: ALTA;Hilda;23
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0007
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 14/20: ISO 7064 MOD 97-10 da 12 para ''ALTA;Ignacio'''
+  m: ALTA;Ignacio;12
+  espera:
+    status: 201
+    response:
+      cuentaId: AC-0008
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 15/20: ISO 7064 MOD 97-10 da 72 para ''TRANSFER;AC-0300;AC-0301;99999'''
+  m: TRANSFER;AC-0300;AC-0301;99999;72
+  espera: *id001
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 16/20: ISO 7064 MOD 97-10 da 78 para ''RETIRO;AC-0001;500'''
+  m: RETIRO;AC-0001;500;78
+  espera: &id002
+    status: 400
+    response:
+      error: E301
+      mensaje: 'comando desconocido '
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 17/20: ISO 7064 MOD 97-10 da 8 para ''HOLA'''
+  m: HOLA;8
+  espera: *id002
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 18/20: ISO 7064 MOD 97-10 da 92 para ''CONSULTA;AC-0001;AC-0002'''
+  m: CONSULTA;AC-0001;AC-0002;92
+  espera: &id003
+    status: 400
+    response:
+      error: E302
+      mensaje: aridad inválida
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 19/20: ISO 7064 MOD 97-10 da 85 para ''ALTA'''
+  m: ALTA;85
+  espera: *id003
+- regla: INT-FORMULA-01
+  hipotesis: 'Verificación 20/20: ISO 7064 MOD 97-10 da 98 para ''TRANSFER;AC-0400;AC-0401;6'''
+  m: TRANSFER;AC-0400;AC-0401;6;98
+  espera: *id001
+- regla: INT-FORMULA-03
+  hipotesis: 'Negativo: 0 no es el control de ''CONSULTA;AC-0135'' (la fórmula da 97)'
+  m: CONSULTA;AC-0135;0
+  espera: &id004
+    status: 400
+    response:
+      error: E202
+      mensaje: control inválido
+- regla: INT-FORMULA-03
+  hipotesis: 'Negativo: 0 no es el control de ''DEPOSITO;AC-0500;26'' (la fórmula da 97)'
+  m: DEPOSITO;AC-0500;26;0
+  espera: *id004
+- regla: INT-FORMULA-03
+  hipotesis: 'Negativo: 1 no es el control de ''CONSULTA;AC-0167'' (la fórmula da 98)'
+  m: CONSULTA;AC-0167;1
+  espera: *id004

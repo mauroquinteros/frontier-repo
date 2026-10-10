@@ -1,0 +1,20 @@
+# Fase 1 · Rutas y métodos desconocidos (R9–R12).
+seq: F1-rutas
+pasos:
+  - regla: ENT-RUTA-01
+    hipotesis: "R9: ruta desconocida con GET (se espera 404)"
+    metodo: GET
+    ruta: /xyz
+  - regla: ENT-RUTA-02
+    hipotesis: "R10: la misma ruta con POST responde igual que con GET"
+    ruta: /xyz
+  - regla: ENT-RUTA-03
+    hipotesis: "R11: método desconocido en una ruta que existe (¿404 o 405?)"
+    metodo: PUT
+    ruta: /msg
+    m: "PING;64"
+  - regla: ENT-RUTA-04
+    hipotesis: "R12: ruta desconocida sin token: ¿gana la autenticación o la ruta?"
+    metodo: GET
+    ruta: /xyz
+    auth: ninguno
