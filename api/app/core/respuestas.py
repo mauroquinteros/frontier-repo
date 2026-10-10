@@ -15,11 +15,23 @@ ERRORES = {
     "E201": (400, "control mal formado"),
     "E202": (400, "control inválido"),
     "E301": (400, "comando desconocido "),
+    "E302": (400, "aridad inválida"),
+    "E303": (400, "monto inválido"),
+    "E304": (400, "origen y destino iguales"),
+    "E401": (404, "cuenta inexistente"),
+    "E402": (404, "operación inexistente"),
     "E404": (404, "ruta desconocida"),
+    "E506": (422, "límite excedido"),
+    "E507": (422, "saldo insuficiente"),
+    "E510": (423, "cuenta bloqueada"),  # 409 antes de las 15:30 (log 634 → 1075)
+    "E520": (409, "operación destructiva: detiene el servicio; reenvía con confirmación"),
 }
 
 OK = {"ok": True}
 PONG = {"pong": True}
+# "recieved" con el error de ortografía del original.
+RECIBIDA = "recieved"
+YA_ANULADA = {"ok": False, "motivo": "ya anulada"}
 
 
 class ErrorServicio(Exception):
