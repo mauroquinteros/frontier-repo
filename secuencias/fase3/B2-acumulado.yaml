@@ -1,0 +1,29 @@
+# Fase 3 · Bloque 2 · T2 y T3: ¿el límite de TRANSFER es por operación o acumulado?
+# Los ejemplos 7, 9 y 10 encajan con dos hipótesis:
+#   por operación: 100000 ≤ límite < 120000;
+#   acumulado:     140000 ≤ límite < 160000 sobre lo ya transferido.
+# Se predice "por operación". Si el límite se acumula, la 2.ª transferencia (total 160000) da E506;
+# si además es global (no por cuenta), también la transferencia desde AC-0003.
+seq: B2-acumulado
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0003", m: "ALTA;Sofia;{c}", espera: {status: 201, response: {cuentaId: AC-0003}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 300000 en AC-0001", m: "DEPOSITO;AC-0001;300000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 300000 en AC-0003", m: "DEPOSITO;AC-0003;300000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}
+
+  - {regla: COM-TRANSFER-02, hipotesis: "T2: primera transferencia de 80000 (total 80000) pasa",
+     m: "TRANSFER;AC-0001;AC-0002;80000;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0003}}}
+  - {regla: COM-TRANSFER-02, hipotesis: "T2: segunda de 80000 (total 160000) pasa: el límite es por operación",
+     m: "TRANSFER;AC-0001;AC-0002;80000;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0004}}}
+  - {regla: COM-TRANSFER-02, hipotesis: "T2: tercera de 80000 (total 240000) pasa",
+     m: "TRANSFER;AC-0001;AC-0002;80000;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0005}}}
+  - {regla: COM-TRANSFER-03, hipotesis: "T3: 80000 desde otra cuenta (AC-0003) pasa",
+     m: "TRANSFER;AC-0003;AC-0002;80000;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0006}}}
+
+  - {regla: COM-TRANSFER-02, hipotesis: "T2: AC-0001 queda en 300000 − 240000 = 60000",
+     m: "CONSULTA;AC-0001;{c}", espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 60000}}}
+  - {regla: COM-TRANSFER-02, hipotesis: "T2: AC-0002 recibió 4 × 80000 = 320000",
+     m: "CONSULTA;AC-0002;{c}", espera: {status: 200, response: {cuenta_id: AC-0002, saldo: 320000}}}

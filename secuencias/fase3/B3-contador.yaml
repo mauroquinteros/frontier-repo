@@ -1,0 +1,36 @@
+# Fase 3 · Bloqueo: ¿E303, E304 o E401 suman al contador de rechazos seguidos?
+# Cada error se prueba desde una cuenta de origen distinta (el contador es por cuenta).
+# Se predice que no suman: solo E506 y E507 bloquean (log 634, 715, 746).
+seq: B3-contador
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0003", m: "ALTA;Sofia;{c}", espera: {status: 201, response: {cuentaId: AC-0003}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0004 (destino)", m: "ALTA;Pedro;{c}", espera: {status: 201, response: {cuentaId: AC-0004}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0001", m: "DEPOSITO;AC-0001;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0002", m: "DEPOSITO;AC-0002;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0003", m: "DEPOSITO;AC-0003;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0003}}}
+
+  # E303 desde AC-0001.
+  - {regla: MEM-BLOQUEO-08, hipotesis: "E303 n.º 1", m: "TRANSFER;AC-0001;AC-0004;0;{c}", espera: {status: 400, response: {error: E303, mensaje: monto inválido}}}
+  - {regla: MEM-BLOQUEO-08, hipotesis: "E303 n.º 2", m: "TRANSFER;AC-0001;AC-0004;0;{c}", espera: {status: 400, response: {error: E303, mensaje: monto inválido}}}
+  - {regla: MEM-BLOQUEO-08, hipotesis: "E303 n.º 3", m: "TRANSFER;AC-0001;AC-0004;0;{c}", espera: {status: 400, response: {error: E303, mensaje: monto inválido}}}
+  - {regla: MEM-BLOQUEO-08, hipotesis: "Tras 3 E303 la cuenta no está bloqueada: una transferencia válida pasa",
+     m: "TRANSFER;AC-0001;AC-0004;100;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0004}}}
+
+  # E304 desde AC-0002.
+  - {regla: MEM-BLOQUEO-09, hipotesis: "E304 n.º 1", m: "TRANSFER;AC-0002;AC-0002;100;{c}", espera: {status: 400, response: {error: E304, mensaje: origen y destino iguales}}}
+  - {regla: MEM-BLOQUEO-09, hipotesis: "E304 n.º 2", m: "TRANSFER;AC-0002;AC-0002;100;{c}", espera: {status: 400, response: {error: E304, mensaje: origen y destino iguales}}}
+  - {regla: MEM-BLOQUEO-09, hipotesis: "E304 n.º 3", m: "TRANSFER;AC-0002;AC-0002;100;{c}", espera: {status: 400, response: {error: E304, mensaje: origen y destino iguales}}}
+  - {regla: MEM-BLOQUEO-09, hipotesis: "Tras 3 E304 la cuenta no está bloqueada: una transferencia válida pasa",
+     m: "TRANSFER;AC-0002;AC-0004;100;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0005}}}
+
+  # E401 (destino inexistente) desde AC-0003.
+  - {regla: MEM-BLOQUEO-10, hipotesis: "E401 n.º 1", m: "TRANSFER;AC-0003;AC-0009;100;{c}", espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: MEM-BLOQUEO-10, hipotesis: "E401 n.º 2", m: "TRANSFER;AC-0003;AC-0009;100;{c}", espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: MEM-BLOQUEO-10, hipotesis: "E401 n.º 3", m: "TRANSFER;AC-0003;AC-0009;100;{c}", espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: MEM-BLOQUEO-10, hipotesis: "Tras 3 E401 la cuenta no está bloqueada: una transferencia válida pasa",
+     m: "TRANSFER;AC-0003;AC-0004;100;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0006}}}

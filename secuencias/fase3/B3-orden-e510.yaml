@@ -1,0 +1,22 @@
+# Fase 3 · Orden de errores: dónde va E510 (cuenta bloqueada).
+# Orden conocido: E303 → E304 → E401 → E506 → E507, y E304 gana sobre E510 (log 803).
+# Se predice: E303 → E304 → E510 → E401 → E506 → E507.
+seq: B3-orden-e510
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0001", m: "DEPOSITO;AC-0001;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: ERR-ORDEN-14, hipotesis: "Bloqueo: E506 n.º 1", m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: ERR-ORDEN-14, hipotesis: "Bloqueo: E506 n.º 2", m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: ERR-ORDEN-14, hipotesis: "Bloqueo: E506 n.º 3", m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: ERR-ORDEN-14, hipotesis: "La cuenta quedó bloqueada", m: "TRANSFER;AC-0001;AC-0002;100;{c}", espera: {status: 409, response: {error: E510, mensaje: cuenta bloqueada}}}
+
+  - {regla: ERR-ORDEN-15, hipotesis: "Bloqueada + monto inválido: gana E303", m: "TRANSFER;AC-0001;AC-0002;0;{c}",
+     espera: {status: 400, response: {error: E303, mensaje: monto inválido}}}
+  - {regla: ERR-ORDEN-16, hipotesis: "Bloqueada + destino inexistente: gana E510", m: "TRANSFER;AC-0001;AC-0009;100;{c}",
+     espera: {status: 409, response: {error: E510, mensaje: cuenta bloqueada}}}
+  - {regla: ERR-ORDEN-17, hipotesis: "Bloqueada + sobre el límite: gana E510", m: "TRANSFER;AC-0001;AC-0002;150000;{c}",
+     espera: {status: 409, response: {error: E510, mensaje: cuenta bloqueada}}}
+  - {regla: ERR-ORDEN-18, hipotesis: "Bloqueada + sin saldo (50000 > 10000): gana E510", m: "TRANSFER;AC-0001;AC-0002;50000;{c}",
+     espera: {status: 409, response: {error: E510, mensaje: cuenta bloqueada}}}

@@ -1,0 +1,17 @@
+# Fase 3 · Bloque 2 · Bloqueo: ¿cuenta 3 rechazos en total o 3 seguidos? Un éxito entre medio decide.
+seq: B2-bloqueo-dos
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 500000 en AC-0001", m: "DEPOSITO;AC-0001;500000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: MEM-BLOQUEO-03, hipotesis: "1.er rechazo por límite", m: "TRANSFER;AC-0001;AC-0002;110000;{c}",
+     espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-03, hipotesis: "2.º rechazo por límite", m: "TRANSFER;AC-0001;AC-0002;110000;{c}",
+     espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-03, hipotesis: "Con 2 rechazos la cuenta no está bloqueada: una transferencia válida pasa",
+     m: "TRANSFER;AC-0001;AC-0002;50000;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}
+  - {regla: MEM-BLOQUEO-03, hipotesis: "3.er rechazo (en total) sigue dando E506", m: "TRANSFER;AC-0001;AC-0002;110000;{c}",
+     espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-03, hipotesis: "Si cuentan 3 seguidos, el éxito reinició el contador y esta pasa; si cuentan 3 en total, da E510",
+     m: "TRANSFER;AC-0001;AC-0002;50000;{c}"}

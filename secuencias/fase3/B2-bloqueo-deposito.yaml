@@ -1,0 +1,9 @@
+# Fase 3 · Bloque 2 · Bloqueo: descarta que el depósito enorme del log 622 haya causado el bloqueo.
+seq: B2-bloqueo-deposito
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: MEM-BLOQUEO-04, hipotesis: "Depósito máximo (9999999999)", m: "DEPOSITO;AC-0001;9999999999;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: MEM-BLOQUEO-04, hipotesis: "Tras el depósito enorme, una transferencia válida pasa: el depósito no bloquea",
+     m: "TRANSFER;AC-0001;AC-0002;50000;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}

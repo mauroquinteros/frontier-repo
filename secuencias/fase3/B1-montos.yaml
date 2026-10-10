@@ -1,0 +1,35 @@
+# Fase 3 · Bloque 1 · Montos (D1, D2, T7). ¿Qué montos aceptan DEPOSITO y TRANSFER y qué error
+# da cada uno? Si la validación es común, TRANSFER debe dar los mismos errores que DEPOSITO.
+# Preparación: AC-0001 con 250000 y AC-0002 con 0 (ejemplos 3, 4 y 6).
+seq: B1-montos
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: ALTA crea AC-0001", m: "ALTA;Lucia;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: ALTA crea AC-0002", m: "ALTA;Mateo;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: depósito de 250000 en AC-0001", m: "DEPOSITO;AC-0001;250000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+
+  # D1: montos inválidos en DEPOSITO. El cuerpo exacto del error es desconocido.
+  - {regla: COM-DEPOSITO-02, hipotesis: "D1: depósito de 0 da un error de monto", m: "DEPOSITO;AC-0001;0;{c}"}
+  - {regla: COM-DEPOSITO-02, hipotesis: "D1: depósito negativo (-100) da un error de monto", m: "DEPOSITO;AC-0001;-100;{c}"}
+  - {regla: COM-DEPOSITO-02, hipotesis: "D1: depósito decimal (10.5) da un error de monto", m: "DEPOSITO;AC-0001;10.5;{c}"}
+  - {regla: COM-DEPOSITO-02, hipotesis: "D1: depósito no numérico (abc) da un error de monto", m: "DEPOSITO;AC-0001;abc;{c}"}
+  - {regla: COM-DEPOSITO-03, hipotesis: "D1: depósito con cero a la izquierda (0700) da error, como el control 014",
+     m: "DEPOSITO;AC-0001;0700;{c}"}
+  - {regla: COM-DEPOSITO-02, hipotesis: "D1: ningún depósito anterior se aplicó: el saldo sigue en 250000",
+     m: "CONSULTA;AC-0001;{c}", espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 250000}}}
+
+  # D2: monto enorme.
+  - {regla: COM-DEPOSITO-04, hipotesis: "D2: depósito de 999999999999 en AC-0002 se acepta (no hay límite de depósito)",
+     m: "DEPOSITO;AC-0002;999999999999;{c}"}
+  - {regla: COM-DEPOSITO-04, hipotesis: "D2: el saldo de AC-0002 muestra si el depósito enorme se aplicó",
+     m: "CONSULTA;AC-0002;{c}"}
+
+  # T7: los mismos montos en TRANSFER (AC-0001 → AC-0002).
+  - {regla: COM-TRANSFER-07, hipotesis: "T7: transferir 0 da el mismo error que depositar 0", m: "TRANSFER;AC-0001;AC-0002;0;{c}"}
+  - {regla: COM-TRANSFER-07, hipotesis: "T7: transferir -100 da el mismo error que depositar -100", m: "TRANSFER;AC-0001;AC-0002;-100;{c}"}
+  - {regla: COM-TRANSFER-07, hipotesis: "T7: transferir 10.5 da el mismo error que depositar 10.5", m: "TRANSFER;AC-0001;AC-0002;10.5;{c}"}
+  - {regla: COM-TRANSFER-07, hipotesis: "T7: transferir abc da el mismo error que depositar abc", m: "TRANSFER;AC-0001;AC-0002;abc;{c}"}
+  - {regla: COM-TRANSFER-07, hipotesis: "T7: ninguna transferencia anterior se aplicó: AC-0001 sigue en 250000",
+     m: "CONSULTA;AC-0001;{c}", espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 250000}}}

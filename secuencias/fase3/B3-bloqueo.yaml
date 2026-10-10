@@ -1,0 +1,22 @@
+# Fase 3 · Bloque 3 · Bloqueo: ¿una mezcla de E506 y E507 seguidos bloquea? ¿ANULA funciona sobre
+# una operación de una cuenta bloqueada?
+seq: B3-bloqueo
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 50000 en AC-0001", m: "DEPOSITO;AC-0001;50000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: COM-TRANSFER-01, hipotesis: "Preparación: transferencia de 1000 que luego se anula", m: "TRANSFER;AC-0001;AC-0002;1000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}
+  - {regla: MEM-BLOQUEO-06, hipotesis: "Rechazo 1: E506", m: "TRANSFER;AC-0001;AC-0002;150000;{c}",
+     espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-06, hipotesis: "Rechazo 2: E507 (60000 está bajo el límite pero sobre el saldo de 49000)",
+     m: "TRANSFER;AC-0001;AC-0002;60000;{c}", espera: {status: 422, response: {error: E507, mensaje: saldo insuficiente}}}
+  - {regla: MEM-BLOQUEO-06, hipotesis: "Rechazo 3: E506", m: "TRANSFER;AC-0001;AC-0002;150000;{c}",
+     espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-06, hipotesis: "La mezcla E506 + E507 también bloquea: una transferencia válida da E510",
+     m: "TRANSFER;AC-0001;AC-0002;100;{c}", espera: {status: 409, response: {error: E510, mensaje: cuenta bloqueada}}}
+  - {regla: MEM-BLOQUEO-07, hipotesis: "¿ANULA de una transferencia que salió de la cuenta bloqueada? (respuesta desconocida)",
+     m: "ANULA;OP-0002;{c}"}
+  - {regla: MEM-BLOQUEO-07, hipotesis: "Saldo de AC-0001 tras el ANULA (49000 si no se aplicó, 50000 si sí)",
+     m: "CONSULTA;AC-0001;{c}"}

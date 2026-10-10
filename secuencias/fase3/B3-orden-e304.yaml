@@ -1,0 +1,28 @@
+# Fase 3 · Orden de errores: dónde va E304 (origen y destino iguales).
+# Orden conocido: E303 (monto) → E401 (cuenta) → E506 (límite) → E507 (saldo); E510 sin ubicar.
+# Se predice: E303 → E304 → E401 → E506 → E507 (E304 se valida con los argumentos, antes de buscar cuentas).
+seq: B3-orden-e304
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 1000 en AC-0001", m: "DEPOSITO;AC-0001;1000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+
+  - {regla: ERR-ORDEN-09, hipotesis: "Misma cuenta y monto inválido: gana E303", m: "TRANSFER;AC-0001;AC-0001;0;{c}",
+     espera: {status: 400, response: {error: E303, mensaje: monto inválido}}}
+  - {regla: ERR-ORDEN-10, hipotesis: "Misma cuenta inexistente: gana E304", m: "TRANSFER;AC-0009;AC-0009;100;{c}",
+     espera: {status: 400, response: {error: E304, mensaje: origen y destino iguales}}}
+  - {regla: ERR-ORDEN-11, hipotesis: "Misma cuenta y sobre el límite: gana E304", m: "TRANSFER;AC-0001;AC-0001;150000;{c}",
+     espera: {status: 400, response: {error: E304, mensaje: origen y destino iguales}}}
+  - {regla: ERR-ORDEN-12, hipotesis: "Misma cuenta y sin saldo (5000 > 1000): gana E304", m: "TRANSFER;AC-0001;AC-0001;5000;{c}",
+     espera: {status: 400, response: {error: E304, mensaje: origen y destino iguales}}}
+
+  # E304 frente a E510: bloquear AC-0002 con 3 E507 y luego transferir a sí misma.
+  - {regla: ERR-ORDEN-13, hipotesis: "Preparación del bloqueo: E507 n.º 1", m: "TRANSFER;AC-0002;AC-0001;5000;{c}",
+     espera: {status: 422, response: {error: E507, mensaje: saldo insuficiente}}}
+  - {regla: ERR-ORDEN-13, hipotesis: "Preparación del bloqueo: E507 n.º 2", m: "TRANSFER;AC-0002;AC-0001;5000;{c}",
+     espera: {status: 422, response: {error: E507, mensaje: saldo insuficiente}}}
+  - {regla: ERR-ORDEN-13, hipotesis: "Preparación del bloqueo: E507 n.º 3", m: "TRANSFER;AC-0002;AC-0001;5000;{c}",
+     espera: {status: 422, response: {error: E507, mensaje: saldo insuficiente}}}
+  - {regla: ERR-ORDEN-13, hipotesis: "Cuenta bloqueada transfiriéndose a sí misma: gana E304", m: "TRANSFER;AC-0002;AC-0002;100;{c}",
+     espera: {status: 400, response: {error: E304, mensaje: origen y destino iguales}}}

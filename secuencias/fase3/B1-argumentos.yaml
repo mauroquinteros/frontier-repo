@@ -1,0 +1,30 @@
+# Fase 3 · Bloque 1 · Argumentos (A1, A2, Q1). Nombres que acepta ALTA y formatos de ID de cuenta.
+# Si un ALTA se rechaza, la numeración de las cuentas siguientes dice si el rechazo consumió número.
+seq: B1-argumentos
+pasos:
+  # A1: nombre vacío. "ALTA;;c" tiene un segmento vacío (E104, log 43 y 74).
+  - {regla: COM-ALTA-02, hipotesis: "A1: nombre vacío da E104 segmento vacío", m: "ALTA;;{c}",
+     espera: {status: 400, response: {error: E104, mensaje: segmento vacío}}}
+
+  # A2: nombres poco comunes. Si todos se aceptan, las cuentas salen AC-0001 a AC-0004.
+  - {regla: COM-ALTA-03, hipotesis: "A2: un nombre de una letra se acepta", m: "ALTA;X;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-03, hipotesis: "A2: un nombre con dígitos se acepta", m: "ALTA;Lucia123;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-ALTA-03, hipotesis: "A2: un nombre solo de dígitos se acepta", m: "ALTA;12345;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0003}}}
+  - {regla: COM-ALTA-03, hipotesis: "A2: un nombre de 200 letras se acepta",
+     m: "ALTA;Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;{c}",
+     espera: {status: 201, response: {cuentaId: AC-0004}}}
+
+  # Q1: formatos de ID. Solo existen AC-0001 a AC-0004.
+  - {regla: COM-CONSULTA-02, hipotesis: "Q1: AC-1 (sin ceros) da E401", m: "CONSULTA;AC-1;{c}",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: COM-CONSULTA-02, hipotesis: "Q1: AC-00001 (5 dígitos) da E401", m: "CONSULTA;AC-00001;{c}",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: COM-CONSULTA-02, hipotesis: "Q1: XX-0001 (otro prefijo) da E401", m: "CONSULTA;XX-0001;{c}",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: COM-CONSULTA-03, hipotesis: "Q1: ac-0001 en minúsculas encuentra la cuenta (CONSULTa funcionó en el ejemplo 11)",
+     m: "CONSULTA;ac-0001;{c}", espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 0}}}
+  - {regla: COM-CONSULTA-01, hipotesis: "Q2: una cuenta recién creada tiene saldo 0", m: "CONSULTA;AC-0004;{c}",
+     espera: {status: 200, response: {cuenta_id: AC-0004, saldo: 0}}}

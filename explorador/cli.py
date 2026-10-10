@@ -4,6 +4,8 @@
     uv run explorador buscar "DEPOSITO;AC-0001;300000" [--seco]
     uv run explorador cupo
     uv run explorador sonda-tamano
+    uv run explorador sonda-monto
+    uv run explorador sonda-limite
     uv run explorador concluir 25 "texto de la conclusión"
 """
 
@@ -14,7 +16,7 @@ from . import config
 from .buscador import Buscador
 from .ejecutor import cargar, ejecutar
 from .registrador import Registrador, completar_conclusiones
-from .sondas import umbral_cuerpo
+from .sondas import umbral_cuerpo, umbral_monto, umbral_transferencia
 
 AVISO_CUPO = 0.9
 
@@ -33,6 +35,8 @@ def main() -> None:
 
     sub.add_parser("cupo", help="requests registrados hoy frente al cupo diario")
     sub.add_parser("sonda-tamano", help="bisección del límite de tamaño del cuerpo (E101)")
+    sub.add_parser("sonda-monto", help="bisección del monto máximo de DEPOSITO (E303)")
+    sub.add_parser("sonda-limite", help="bisección del límite por operación de TRANSFER (E506)")
 
     p_concluir = sub.add_parser("concluir", help="completa la conclusión vacía de una línea del log")
     p_concluir.add_argument("id", type=int)
@@ -63,6 +67,10 @@ def main() -> None:
             print(f"{mensaje};{control}")
     elif args.comando == "sonda-tamano":
         umbral_cuerpo(reg)
+    elif args.comando == "sonda-monto":
+        umbral_monto(reg)
+    elif args.comando == "sonda-limite":
+        umbral_transferencia(reg)
 
 
 def _avisar_cupo(reg: Registrador) -> None:

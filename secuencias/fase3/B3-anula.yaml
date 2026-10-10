@@ -1,0 +1,48 @@
+# Fase 3 · Bloque 3 · ANULA (N1–N4). N5 ya está respondido por los ejemplos 13–18: ANULA no
+# consume número de operación. N6 no aplica: el límite es por operación (log 613–618).
+seq: B3-anula
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0003", m: "ALTA;Sofia;{c}", espera: {status: 201, response: {cuentaId: AC-0003}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 100000 en AC-0001", m: "DEPOSITO;AC-0001;100000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+
+  # N1: anular un depósito.
+  - {regla: COM-ANULA-02, hipotesis: "N1: depósito de 5000 en AC-0002", m: "DEPOSITO;AC-0002;5000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}
+  - {regla: COM-ANULA-02, hipotesis: "N1: un depósito se puede anular", m: "ANULA;OP-0002;{c}",
+     espera: {status: 200, response: {ok: true, anulada: OP-0002}}}
+  - {regla: COM-ANULA-02, hipotesis: "N1: el saldo vuelve a 0", m: "CONSULTA;AC-0002;{c}",
+     espera: {status: 200, response: {cuenta_id: AC-0002, saldo: 0}}}
+  - {regla: COM-ANULA-03, hipotesis: "Anular otra vez el mismo depósito da ok:false ya anulada (como el ejemplo 14)",
+     m: "ANULA;OP-0002;{c}", espera: {status: 200, response: {ok: false, motivo: ya anulada}}}
+
+  # N2: anular una transferencia revierte las dos cuentas.
+  - {regla: COM-ANULA-01, hipotesis: "N2: transferencia de 30000 AC-0001 → AC-0002", m: "TRANSFER;AC-0001;AC-0002;30000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0003}}}
+  - {regla: COM-ANULA-01, hipotesis: "N2: se anula", m: "ANULA;OP-0003;{c}", espera: {status: 200, response: {ok: true, anulada: OP-0003}}}
+  - {regla: COM-ANULA-01, hipotesis: "N2: el origen recupera los 30000", m: "CONSULTA;AC-0001;{c}",
+     espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 100000}}}
+  - {regla: COM-ANULA-01, hipotesis: "N2: el destino los pierde", m: "CONSULTA;AC-0002;{c}",
+     espera: {status: 200, response: {cuenta_id: AC-0002, saldo: 0}}}
+
+  # N3: anular cuando el destino ya gastó el dinero.
+  - {regla: COM-ANULA-04, hipotesis: "N3: transferencia de 40000 AC-0001 → AC-0002", m: "TRANSFER;AC-0001;AC-0002;40000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0004}}}
+  - {regla: COM-ANULA-04, hipotesis: "N3: AC-0002 gasta los 40000 en AC-0003", m: "TRANSFER;AC-0002;AC-0003;40000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0005}}}
+  - {regla: COM-ANULA-04, hipotesis: "N3: anular OP-0004 con el destino en 0 (¿saldo negativo, error u ok:false?)",
+     m: "ANULA;OP-0004;{c}"}
+  - {regla: COM-ANULA-04, hipotesis: "N3: saldo del origen tras el intento", m: "CONSULTA;AC-0001;{c}"}
+  - {regla: COM-ANULA-04, hipotesis: "N3: saldo del destino tras el intento (¿negativo?)", m: "CONSULTA;AC-0002;{c}"}
+
+  # N4: IDs inválidos.
+  - {regla: COM-ANULA-05, hipotesis: "N4: operación inexistente da E402 (log 141)", m: "ANULA;OP-0099;{c}",
+     espera: {status: 404, response: {error: E402, mensaje: operación inexistente}}}
+  - {regla: COM-ANULA-05, hipotesis: "N4: un ID de cuenta da E402", m: "ANULA;AC-0001;{c}",
+     espera: {status: 404, response: {error: E402, mensaje: operación inexistente}}}
+  - {regla: COM-ANULA-05, hipotesis: "N4: un ID sin formato da E402", m: "ANULA;xyz;{c}",
+     espera: {status: 404, response: {error: E402, mensaje: operación inexistente}}}
+  - {regla: COM-ANULA-05, hipotesis: "N4: op-0001 en minúsculas da E402 (los IDs distinguen mayúsculas, log 540)",
+     m: "ANULA;op-0001;{c}", espera: {status: 404, response: {error: E402, mensaje: operación inexistente}}}

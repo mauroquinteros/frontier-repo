@@ -1,0 +1,15 @@
+# Fase 3 · Bloque 2 · Bloqueo: ¿3 E507 (saldo insuficiente) seguidos también bloquean la cuenta?
+seq: B2-bloqueo-e507
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 1000 en AC-0001", m: "DEPOSITO;AC-0001;1000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: MEM-BLOQUEO-05, hipotesis: "1.er E507", m: "TRANSFER;AC-0001;AC-0002;5000;{c}",
+     espera: {status: 422, response: {error: E507, mensaje: saldo insuficiente}}}
+  - {regla: MEM-BLOQUEO-05, hipotesis: "2.º E507", m: "TRANSFER;AC-0001;AC-0002;5000;{c}",
+     espera: {status: 422, response: {error: E507, mensaje: saldo insuficiente}}}
+  - {regla: MEM-BLOQUEO-05, hipotesis: "3.er E507", m: "TRANSFER;AC-0001;AC-0002;5000;{c}",
+     espera: {status: 422, response: {error: E507, mensaje: saldo insuficiente}}}
+  - {regla: MEM-BLOQUEO-05, hipotesis: "Solo los E506 bloquean: tras 3 E507, una transferencia válida pasa",
+     m: "TRANSFER;AC-0001;AC-0002;500;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}

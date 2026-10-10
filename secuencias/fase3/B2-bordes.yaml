@@ -1,0 +1,38 @@
+# Fase 3 · Bloque 2 · Bordes de TRANSFER y orden de errores (T4, T5, T6, T8, T9).
+# Límite por operación: 100000 (log 691–692). Ningún paso provoca 3 E506 seguidos.
+seq: B2-bordes
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 50000 en AC-0001", m: "DEPOSITO;AC-0001;50000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+
+  # T4: borde del saldo.
+  - {regla: COM-TRANSFER-04, hipotesis: "T4: transferir exactamente el saldo (50000) se acepta",
+     m: "TRANSFER;AC-0001;AC-0002;50000;{c}", espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}
+  - {regla: COM-TRANSFER-04, hipotesis: "T4: AC-0001 queda en 0", m: "CONSULTA;AC-0001;{c}",
+     espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 0}}}
+  - {regla: COM-TRANSFER-04, hipotesis: "T4: transferir el saldo + 1 (50001 desde AC-0002) da E507",
+     m: "TRANSFER;AC-0002;AC-0001;50001;{c}", espera: {status: 422, response: {error: E507, mensaje: saldo insuficiente}}}
+
+  # T5: misma cuenta.
+  - {regla: COM-TRANSFER-05, hipotesis: "T5: transferir a la misma cuenta (respuesta desconocida)",
+     m: "TRANSFER;AC-0002;AC-0002;100;{c}"}
+  - {regla: COM-TRANSFER-05, hipotesis: "T5: el saldo de AC-0002 muestra si la transferencia a sí misma tuvo efecto",
+     m: "CONSULTA;AC-0002;{c}"}
+
+  # T6: cuentas inexistentes.
+  - {regla: COM-TRANSFER-06, hipotesis: "T6: origen inexistente da E401", m: "TRANSFER;AC-0009;AC-0002;100;{c}",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: COM-TRANSFER-06, hipotesis: "T6: destino inexistente da E401", m: "TRANSFER;AC-0002;AC-0009;100;{c}",
+     espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+
+  # T8, T9 y combinaciones: qué error gana. AC-0001 tiene saldo 0.
+  - {regla: ERR-ORDEN-05, hipotesis: "T8: sobre el límite y sin saldo, gana E506 (el límite antes que el saldo)",
+     m: "TRANSFER;AC-0001;AC-0002;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: ERR-ORDEN-06, hipotesis: "T9: origen inexistente y sobre el límite, gana E401",
+     m: "TRANSFER;AC-0009;AC-0002;150000;{c}", espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: ERR-ORDEN-07, hipotesis: "Destino inexistente y sin saldo, gana E401",
+     m: "TRANSFER;AC-0001;AC-0009;500;{c}", espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: ERR-ORDEN-08, hipotesis: "Monto inválido y origen inexistente: gana E303 (el formato antes que la cuenta)",
+     m: "TRANSFER;AC-0009;AC-0002;0;{c}", espera: {status: 400, response: {error: E303, mensaje: monto inválido}}}

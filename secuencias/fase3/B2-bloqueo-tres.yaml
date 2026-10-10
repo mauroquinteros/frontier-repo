@@ -1,0 +1,25 @@
+# Fase 3 · Bloque 2 · Bloqueo (descubierto en log 626: 409 E510 "cuenta bloqueada" tras 3 E506).
+# ¿Tres E506 bloquean la cuenta de origen sin depósito enorme? ¿Qué queda bloqueado?
+seq: B2-bloqueo-tres
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 500000 en AC-0001 (monto normal)", m: "DEPOSITO;AC-0001;500000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "1.er rechazo por límite", m: "TRANSFER;AC-0001;AC-0002;110000;{c}",
+     espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "2.º rechazo por límite", m: "TRANSFER;AC-0001;AC-0002;110000;{c}",
+     espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "3.er rechazo por límite (todavía E506)", m: "TRANSFER;AC-0001;AC-0002;110000;{c}",
+     espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-01, hipotesis: "Tras 3 E506, una transferencia válida da E510: la cuenta quedó bloqueada",
+     m: "TRANSFER;AC-0001;AC-0002;50000;{c}", espera: {status: 409, response: {error: E510, mensaje: cuenta bloqueada}}}
+  - {regla: MEM-BLOQUEO-02, hipotesis: "¿CONSULTA de la cuenta bloqueada funciona? (se espera que sí, saldo 500000)",
+     m: "CONSULTA;AC-0001;{c}", espera: {status: 200, response: {cuenta_id: AC-0001, saldo: 500000}}}
+  - {regla: MEM-BLOQUEO-02, hipotesis: "¿DEPOSITO en la cuenta bloqueada? (respuesta desconocida)", m: "DEPOSITO;AC-0001;1000;{c}"}
+  - {regla: MEM-BLOQUEO-02, hipotesis: "Preparación: depósito en AC-0002, para poder transferir desde ella", m: "DEPOSITO;AC-0002;5000;{c}"}
+  - {regla: MEM-BLOQUEO-02, hipotesis: "¿La cuenta bloqueada puede recibir? TRANSFER AC-0002 → AC-0001 (respuesta desconocida)",
+     m: "TRANSFER;AC-0002;AC-0001;1000;{c}"}
+  - {regla: MEM-BLOQUEO-02, hipotesis: "Preparación: AC-0003, destino para comprobar que AC-0002 no está bloqueada",
+     m: "ALTA;Sofia;{c}"}
+  - {regla: MEM-BLOQUEO-02, hipotesis: "AC-0002 transfiere a AC-0003 sin bloqueo", m: "TRANSFER;AC-0002;AC-0003;1000;{c}"}

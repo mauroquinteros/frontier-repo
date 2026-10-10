@@ -1,0 +1,41 @@
+# Fase 3 · Bloqueo: un error que no suma, ¿reinicia el contador o lo deja igual?
+# Patrón por cuenta: E506, E506, X, E506 y una transferencia válida.
+#   Si X deja el contador igual → la válida da E510 (3 E506 "seguidos" ignorando X).
+#   Si X reinicia el contador → la válida pasa.
+# Se predice que X deja el contador igual.
+seq: B3-contador-neutro
+pasos:
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0001", m: "ALTA;Lucia;{c}", espera: {status: 201, response: {cuentaId: AC-0001}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0002", m: "ALTA;Mateo;{c}", espera: {status: 201, response: {cuentaId: AC-0002}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0003", m: "ALTA;Sofia;{c}", espera: {status: 201, response: {cuentaId: AC-0003}}}
+  - {regla: COM-ALTA-01, hipotesis: "Preparación: AC-0004 (destino)", m: "ALTA;Pedro;{c}", espera: {status: 201, response: {cuentaId: AC-0004}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0001", m: "DEPOSITO;AC-0001;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0001}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0002", m: "DEPOSITO;AC-0002;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0002}}}
+  - {regla: COM-DEPOSITO-01, hipotesis: "Preparación: 10000 en AC-0003", m: "DEPOSITO;AC-0003;10000;{c}",
+     espera: {status: 200, response: {status: recieved, operacionId: OP-0003}}}
+
+  # X = E303 en AC-0001.
+  - {regla: MEM-BLOQUEO-11, hipotesis: "E506 n.º 1", m: "TRANSFER;AC-0001;AC-0004;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-11, hipotesis: "E506 n.º 2", m: "TRANSFER;AC-0001;AC-0004;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-11, hipotesis: "E303 en medio", m: "TRANSFER;AC-0001;AC-0004;0;{c}", espera: {status: 400, response: {error: E303, mensaje: monto inválido}}}
+  - {regla: MEM-BLOQUEO-11, hipotesis: "E506 n.º 3 (tercero si E303 no reinicia)", m: "TRANSFER;AC-0001;AC-0004;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-11, hipotesis: "E303 no reinicia el contador: la válida da E510",
+     m: "TRANSFER;AC-0001;AC-0004;100;{c}", espera: {status: 409, response: {error: E510, mensaje: cuenta bloqueada}}}
+
+  # X = E304 en AC-0002.
+  - {regla: MEM-BLOQUEO-12, hipotesis: "E506 n.º 1", m: "TRANSFER;AC-0002;AC-0004;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-12, hipotesis: "E506 n.º 2", m: "TRANSFER;AC-0002;AC-0004;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-12, hipotesis: "E304 en medio", m: "TRANSFER;AC-0002;AC-0002;100;{c}", espera: {status: 400, response: {error: E304, mensaje: origen y destino iguales}}}
+  - {regla: MEM-BLOQUEO-12, hipotesis: "E506 n.º 3 (tercero si E304 no reinicia)", m: "TRANSFER;AC-0002;AC-0004;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-12, hipotesis: "E304 no reinicia el contador: la válida da E510",
+     m: "TRANSFER;AC-0002;AC-0004;100;{c}", espera: {status: 409, response: {error: E510, mensaje: cuenta bloqueada}}}
+
+  # X = E401 en AC-0003.
+  - {regla: MEM-BLOQUEO-13, hipotesis: "E506 n.º 1", m: "TRANSFER;AC-0003;AC-0004;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-13, hipotesis: "E506 n.º 2", m: "TRANSFER;AC-0003;AC-0004;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-13, hipotesis: "E401 en medio", m: "TRANSFER;AC-0003;AC-0009;100;{c}", espera: {status: 404, response: {error: E401, mensaje: cuenta inexistente}}}
+  - {regla: MEM-BLOQUEO-13, hipotesis: "E506 n.º 3 (tercero si E401 no reinicia)", m: "TRANSFER;AC-0003;AC-0004;150000;{c}", espera: {status: 422, response: {error: E506, mensaje: límite excedido}}}
+  - {regla: MEM-BLOQUEO-13, hipotesis: "E401 no reinicia el contador: la válida da E510",
+     m: "TRANSFER;AC-0003;AC-0004;100;{c}", espera: {status: 409, response: {error: E510, mensaje: cuenta bloqueada}}}
