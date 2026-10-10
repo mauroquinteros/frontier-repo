@@ -12,6 +12,8 @@ Entrega a las 20:00: el reemplazo desplegado, la especificación y `experimentos
 | [docs/planning.md](docs/planning.md) | Documento de diseño: el problema, supuestos, las tres piezas (explorar → construir → medir), formato del log y decisiones |
 | [docs/plan-exploracion.md](docs/plan-exploracion.md) | Detalle de cada prueba por fase (R1–R22, C1–C8, A/Q/D/T/N, M1–M3), presupuesto y criterio de cierre |
 | [docs/arquitectura.svg](docs/arquitectura.svg) | Diagrama de la arquitectura |
+| [docs/progreso.md](docs/progreso.md) | **Estado actual y reglas vigentes** con su evidencia, cambios de las 15:30, supuestos y pendientes. Base de la especificación |
+| [api/](api/) | **Código del sistema nuevo (el reemplazo)**: FastAPI, con sus propios tests |
 | [pruebas/ejemplos.jsonl](pruebas/ejemplos.jsonl) | Los 20 ejemplos oficiales: una sola secuencia tras reset, versión de la mañana |
 | `.env` | `BEARER_TOKEN` personal. Nunca mostrarlo, commitearlo ni escribirlo en el log |
 
@@ -20,9 +22,13 @@ Servicio original: `https://caja-negra-production-c64f.up.railway.app` (`POST /m
 
 ## Estado actual
 
-Fase de **exploración**: entender cómo responde el original. Todavía no hay código del reemplazo.
-El comparador reemplazo vs. original queda para cuando el reemplazo exista. Solo explora una
-persona (un token, un único `experimentos.jsonl`).
+Fase de **desarrollo de la API**. La exploración está **cerrada** (19:05): no se mandan más requests
+al original salvo pedido explícito. El servicio cambió una sola vez, a las 15:30 (intencional, no
+habrá otro); el reemplazo implementa la versión vigente desde entonces. Reglas, evidencia y
+supuestos en [docs/progreso.md](docs/progreso.md).
+
+**El código del sistema nuevo ya existe en [api/](api/)**: no crear otro proyecto ni otra carpeta
+para el reemplazo. Pendiente: desplegarlo y escribir la especificación.
 
 ## Herramienta de exploración
 
@@ -44,6 +50,28 @@ uv run explorador diferencias 15:30 [--detalle]           # antes vs. después d
   [explorador/control.py](explorador/control.py). En los YAML, `;{c}` se calcula con ella sin
   gastar requests; solo los mensajes con caracteres sin evidencia (tildes, espacios) pasan por el
   buscador. Pares encontrados por fuerza bruta: `explorador/controles.json`.
+
+## Reemplazo (`api/`)
+
+FastAPI + uv, con su propio `pyproject.toml` (no usa el entorno de la raíz). Los comandos se corren
+desde `api/`.
+
+| Archivo | Contenido |
+| --- | --- |
+| [app/api/routes.py](api/app/api/routes.py), [dependencies.py](api/app/api/dependencies.py) | Rutas `/msg`, `/health`, `/__reset` y validación del token |
+| [app/services/entrada.py](api/app/services/entrada.py) | Validación del cuerpo y del control, en el orden del original |
+| [app/services/comandos.py](api/app/services/comandos.py) | Los 7 comandos, orden de errores, bloqueo e `intentos`, sugerencias |
+| [app/services/estado.py](api/app/services/estado.py) | Estado en memoria (montos en centavos) |
+| [app/core/respuestas.py](api/app/core/respuestas.py) | **Único lugar** con los textos y status de respuesta |
+| [tests/test_log.py](api/tests/test_log.py) | Reproduce cada secuencia del log posterior a las 15:30 contra el reemplazo |
+
+```bash
+cd api && uv run pytest -q                                 # incluye el replay del log
+API_TOKEN=<token del equipo> uv run uvicorn app.main:app   # arranca en local
+```
+
+- `API_TOKEN` es el token del **equipo** (README), no el `BEARER_TOKEN` personal del `.env`.
+- Una regla nueva o corregida va con un comentario que cite los `id` del log que la respaldan.
 
 ## Reglas que no se pueden romper
 
@@ -86,6 +114,6 @@ en el mismo orden, strings y números idénticos; si alguno no es JSON, texto ex
   La forma del cuerpo sí se prueba, en versión mínima (R13–R22), porque la especificación la pide.
 - Autenticación: solo token ausente y token inválido. Sí una prueba mínima de rutas y métodos
   desconocidos.
-- Cierre de la exploración: ≥ 80 % de predicciones acertadas en un lote de ~30 secuencias nuevas, y
-  la fórmula del control 20/20 (ver `docs/plan-exploracion.md` sección 6).
+- Exploración cerrada sin el lote de cierre: lo reemplaza el replay del log (`tests/test_log.py`),
+  que comprueba el reemplazo contra todas las secuencias posteriores al cambio.
 - Documentos y respuestas en español.
